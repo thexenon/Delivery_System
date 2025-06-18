@@ -13,10 +13,6 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     store: {
       type: mongoose.Schema.ObjectId,
       ref: 'Store',
@@ -31,6 +27,11 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'Review must belong to a user'],
+    },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
     },
   },
   {

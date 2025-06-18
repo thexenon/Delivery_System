@@ -13,7 +13,6 @@ const cookieParser = require('cookie-parser');
 
 const userRouter = require('./routes/userRoutes');
 const productRouter = require('./routes/productRoutes');
-const foodRouter = require('./routes/foodRoutes');
 const orderRouter = require('./routes/orderRoutes');
 const storeRouter = require('./routes/storeRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
@@ -101,7 +100,6 @@ app.use(compression());
 // 3) Routes
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
-app.use('/api/v1/foods', foodRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/categorys', categoryRouter);
 app.use('/api/v1/reviews', reviewRouter);

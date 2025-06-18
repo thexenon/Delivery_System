@@ -4,19 +4,26 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router({ mergeParams: true });
 
-router.use(authController.protect);
-
 router
   .route('/')
   .get(categoryController.getAllCategorys)
-  .post(authController.restrictTo('admin'), categoryController.createCategory);
+  .post(
+    authController.protect,
+    authController.restrictTo('admin', 'superadmin', 'creator'),
+    categoryController.createCategory,
+  );
 
 router
   .route('/:id')
   .get(categoryController.getCategory)
-  .patch(authController.restrictTo('admin'), categoryController.updateCategory)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin', 'superadmin', 'creator'),
+    categoryController.updateCategory,
+  )
   .delete(
-    authController.restrictTo('admin', 'creator'),
+    authController.protect,
+    authController.restrictTo('admin', 'superadmin', 'creator'),
     categoryController.deleteCategory,
   );
 

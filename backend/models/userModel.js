@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user',
       enum: {
-        values: ['admin', 'creator', 'user', 'rider', 'merchant'],
+        values: ['admin', 'superadmin', 'creator', 'user', 'rider', 'merchant'],
         message: 'Role is either ||merchant||user||rider||',
       },
     },
@@ -69,14 +69,10 @@ const userSchema = new mongoose.Schema(
         required: true,
       },
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-      select: false,
-    },
     active: {
       type: Boolean,
       default: true,
+      select: false,
     },
     isVerified: { type: Boolean, default: false },
     verificationToken: String,

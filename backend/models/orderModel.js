@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema(
   {
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     rider: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
@@ -59,6 +55,11 @@ const orderSchema = new mongoose.Schema(
         values: ['Cash', 'Momo', 'In-app'],
         message: 'Status is either ||In-app||Momo||Cash||',
       },
+    },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
     },
   },
   {

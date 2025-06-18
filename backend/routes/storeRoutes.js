@@ -10,7 +10,8 @@ router
   .route('/')
   .get(storeController.getAllStores)
   .post(
-    authController.restrictTo('merchant'),
+    authController.protect,
+    authController.restrictTo('merchant', 'admin', 'superadmin', 'creator'),
     storeController.setRequiredIds,
     storeController.createStore,
   );
@@ -18,9 +19,14 @@ router
 router
   .route('/:id')
   .get(storeController.getStore)
-  .patch(authController.restrictTo('merchant'), storeController.updateStore)
+  .patch(
+    authController.protect,
+    authController.restrictTo('merchant', 'admin', 'superadmin', 'creator'),
+    storeController.updateStore,
+  )
   .delete(
-    authController.restrictTo('merchant', 'admin', 'creator'),
+    authController.protect,
+    authController.restrictTo('merchant', 'admin', 'superadmin', 'creator'),
     storeController.deleteStore,
   );
 

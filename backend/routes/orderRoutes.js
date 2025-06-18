@@ -4,12 +4,11 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router({ mergeParams: true });
 
-router.use(authController.protect);
-
 router
   .route('/')
   .get(orderController.getAllOrders)
   .post(
+    authController.protect,
     authController.restrictTo('user'),
     orderController.setRequiredIds,
     orderController.createOrder,
@@ -19,10 +18,12 @@ router
   .route('/:id')
   .get(orderController.getOrder)
   .patch(
+    authController.protect,
     authController.restrictTo('user', 'rider', 'merchant'),
     orderController.updateOrder,
   )
   .delete(
+    authController.protect,
     authController.restrictTo('user', 'admin', 'creator'),
     orderController.deleteOrder,
   );

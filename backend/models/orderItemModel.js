@@ -2,13 +2,14 @@ const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema(
   {
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     order: {
       type: mongoose.Schema.ObjectId,
       ref: 'Order',
+    },
+    store: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Store',
+      required: [true, 'Order Item must belong to a store.'],
     },
     product: {
       type: mongoose.Schema.ObjectId,
@@ -20,7 +21,6 @@ const orderItemSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Order Item must belong to a product.'],
     },
-
     amount: {
       type: Number,
       required: [true, 'Amount must be set'],
@@ -48,6 +48,11 @@ const orderItemSchema = new mongoose.Schema(
         message:
           'Status is either ||in-transit||pending||delivered||accepted||cancelled||picked-up||',
       },
+    },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
     },
   },
   {

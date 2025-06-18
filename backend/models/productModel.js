@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema(
       required: [true, 'A product must have a name'],
       maxlength: [
         50,
-        'A product name must have less or equal then 40 characters',
+        'A product name must have less or equal then 50 characters',
       ],
       minlength: [
         10,
@@ -49,7 +49,6 @@ const productSchema = new mongoose.Schema(
       type: Number,
       validate: {
         validator: function (val) {
-          // this only points to current doc on NEW document creation
           return val < this.price;
         },
         message: 'Discount price ({VALUE}) should be below regular price',
@@ -86,9 +85,35 @@ const productSchema = new mongoose.Schema(
         },
       ],
     },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
+    productoptions: [
+      {
+        name: {
+          type: String,
+          required: [true, 'Product Options must have a name'],
+        },
+        options: [
+          {
+            name: {
+              type: String,
+              required: [true, 'Product Option must have a name'],
+            },
+            additionalCost: {
+              type: Number,
+              required: [true, 'Product Option must have an additional cost'],
+              min: [0, 'Additional cost must be >= 0'],
+            },
+          },
+        ],
+        required: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
+
+    active: {
+      type: Boolean,
+      default: true,
       select: false,
     },
     secretProduct: {
@@ -105,6 +130,11 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ price: 1 });
 
+productSchema.pre(/^find/, function (next) {
+  this.finalprice = this.priceDiscount * 1.08 || this.price * 1.08;
+  next();
+});
+
 productSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'product',
@@ -113,8 +143,8 @@ productSchema.virtual('reviews', {
 
 productSchema.pre(/^find/, function (next) {
   this.find({ secretProduct: { $ne: true } });
+  this.find({ active: { $ne: false } });
 
-  this.start = Date.now();
   next();
 });
 

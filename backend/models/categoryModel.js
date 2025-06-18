@@ -12,6 +12,11 @@ const categorySchema = new mongoose.Schema(
         required: [true, 'Category can not be empty!'],
       },
     ],
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
   },
   {
     toJSON: { virtuals: true },

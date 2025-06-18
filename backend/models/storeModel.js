@@ -42,7 +42,7 @@ const storeSchema = new mongoose.Schema(
         default: 'Point',
       },
       coordinates: {
-        type: [Number], // [longitude, latitude]
+        type: [Number],
         required: true,
       },
     },
@@ -57,16 +57,31 @@ const storeSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-      select: false,
-    },
     active: {
       type: Boolean,
       default: true,
+      select: false,
     },
     isVerified: { type: Boolean, default: false },
+    workingHours: [
+      {
+        day: {
+          type: String,
+          required: true,
+          enum: [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ],
+        },
+        open: { type: String, required: true },
+        close: { type: String, required: true },
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
