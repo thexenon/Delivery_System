@@ -9,6 +9,8 @@ import {
   Alert,
   ScrollView,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -186,83 +188,89 @@ export default function AddStoreScreen() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
     >
-      <Text style={styles.title}>Add New Store</Text>
-      <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.imagePreview} />
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="camera" size={36} color="#aaa" />
-            <Text style={{ color: '#aaa', marginTop: 4 }}>Select Image</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-      <TextInput
-        style={styles.input}
-        placeholder="Store Name"
-        placeholderTextColor="#aaa"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        placeholderTextColor="#aaa"
-        keyboardType="phone-pad"
-        value={phone}
-        onChangeText={setPhone}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        placeholderTextColor="#aaa"
-        value={address}
-        onChangeText={setAddress}
-      />
-      <TouchableOpacity style={styles.locationBtn} onPress={handleLocation}>
-        <Ionicons name="location-outline" size={18} color="#4f8cff" />
-        <Text style={styles.locationBtnText}>
-          {location ? 'Location Set' : 'Set Location'}
-        </Text>
-      </TouchableOpacity>
-      <Text style={styles.sectionTitle}>Working Hours</Text>
-      {workingHours.map((wh, idx) => (
-        <View key={wh.day} style={styles.workingHourRow}>
-          <Text style={styles.workingHourDay}>{wh.day}</Text>
-          <TextInput
-            style={styles.workingHourInput}
-            placeholder="Open (e.g. 08:00)"
-            placeholderTextColor="#aaa"
-            value={wh.open}
-            onChangeText={(val) => handleWorkingHourChange(idx, 'open', val)}
-          />
-          <TextInput
-            style={styles.workingHourInput}
-            placeholder="Close (e.g. 18:00)"
-            placeholderTextColor="#aaa"
-            value={wh.close}
-            onChangeText={(val) => handleWorkingHourChange(idx, 'close', val)}
-          />
-        </View>
-      ))}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={loading}
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>
-            {storeId ? 'Update Store' : 'Add Store'}
+        <Text style={styles.title}>Add New Store</Text>
+        <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.imagePreview} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="camera" size={36} color="#aaa" />
+              <Text style={{ color: '#aaa', marginTop: 4 }}>Select Image</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Store Name"
+          placeholderTextColor="#aaa"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone Number"
+          placeholderTextColor="#aaa"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          placeholderTextColor="#aaa"
+          value={address}
+          onChangeText={setAddress}
+        />
+        <TouchableOpacity style={styles.locationBtn} onPress={handleLocation}>
+          <Ionicons name="location-outline" size={18} color="#4f8cff" />
+          <Text style={styles.locationBtnText}>
+            {location ? 'Location Set' : 'Set Location'}
           </Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>Working Hours</Text>
+        {workingHours.map((wh, idx) => (
+          <View key={wh.day} style={styles.workingHourRow}>
+            <Text style={styles.workingHourDay}>{wh.day}</Text>
+            <TextInput
+              style={styles.workingHourInput}
+              placeholder="Open (e.g. 08:00)"
+              placeholderTextColor="#aaa"
+              value={wh.open}
+              onChangeText={(val) => handleWorkingHourChange(idx, 'open', val)}
+            />
+            <TextInput
+              style={styles.workingHourInput}
+              placeholder="Close (e.g. 18:00)"
+              placeholderTextColor="#aaa"
+              value={wh.close}
+              onChangeText={(val) => handleWorkingHourChange(idx, 'close', val)}
+            />
+          </View>
+        ))}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>
+              {storeId ? 'Update Store' : 'Add Store'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

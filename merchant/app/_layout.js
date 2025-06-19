@@ -7,18 +7,18 @@ import { View, ActivityIndicator } from 'react-native';
 export default function RootLayout() {
   const router = useRouter();
 
-  // const isUserLoggedIn = async () => {
-  //   const token = await AsyncStorage.getItem('jwt');
-  //   if (!token) {
-  //     router.replace('/(auth)/signin');
-  //   } else {
-  //     router.replace('(tabs)/home');
-  //   }
-  // };
+  const isUserLoggedIn = async () => {
+    const token = await AsyncStorage.getItem('jwt');
+    if (!token) {
+      router.replace('/(auth)/signin');
+    } else {
+      router.replace('(tabs)/home');
+    }
+  };
 
-  // useEffect(() => {
-  //   isUserLoggedIn();
-  // }, []);
+  useEffect(() => {
+    isUserLoggedIn();
+  }, []);
 
   return (
     <Stack>

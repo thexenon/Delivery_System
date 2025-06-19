@@ -9,12 +9,14 @@ import {
   Alert,
   ScrollView,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { getItems, submitPost } from '../utils/api';
+import { getItems, submitUserUpdate } from '../utils/api';
 
 export default function SettingsScreen() {
   const [user, setUser] = useState(null);
@@ -35,9 +37,6 @@ export default function SettingsScreen() {
         const userUID = await AsyncStorage.getItem('userUID');
         if (!token || !userUID) throw new Error('User not authenticated');
         const result = await getItems(`users/me`);
-        console.log('====================================');
-        console.log('Fetch User Result:', result.data.data.data);
-        console.log('====================================');
         if (result.status === 200) {
           const userData = result?.data.data.data;
           setUser(userData);
@@ -116,7 +115,7 @@ export default function SettingsScreen() {
         address,
         ...(imageUrl ? { image: imageUrl } : {}),
       };
-      const result = await submitPost(userData, 'users/updateMe');
+      const result = await submitUserUpdate(userData, 'users/updateMe');
       console.log('====================================');
       console.log('Update User Result:', result);
       console.log('====================================');
@@ -141,66 +140,72 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
     >
-      <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.imagePreview} />
-        ) : (
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="camera" size={36} color="#aaa" />
-            <Text style={{ color: '#aaa', marginTop: 4 }}>Select Image</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-      <Text style={styles.title}>Edit Profile</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          placeholderTextColor="#aaa"
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email Address"
-          placeholderTextColor="#aaa"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Phone Number"
-          placeholderTextColor="#aaa"
-          keyboardType="phone-pad"
-          value={phone.toString()}
-          onChangeText={setPhone}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Address"
-          placeholderTextColor="#aaa"
-          value={address}
-          onChangeText={setAddress}
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSave}
-        disabled={saving}
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
       >
-        {saving ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Save Changes</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.imagePreview} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="camera" size={36} color="#aaa" />
+              <Text style={{ color: '#aaa', marginTop: 4 }}>Select Image</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.title}>Edit Profile</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Full Name"
+            placeholderTextColor="#aaa"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email Address"
+            placeholderTextColor="#aaa"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Phone Number"
+            placeholderTextColor="#aaa"
+            keyboardType="phone-pad"
+            value={phone.toString()}
+            onChangeText={setPhone}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Address"
+            placeholderTextColor="#aaa"
+            value={address}
+            onChangeText={setAddress}
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Save Changes</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -122,13 +122,13 @@ export default function OrdersScreen() {
         <View style={{ alignItems: 'center', marginTop: 40 }}>
           <ErrorView msg={error} />
         </View>
-      ) : filteredOrders.length === 0 ? (
+      ) : orders.length === 0 ? (
         <View style={{ alignItems: 'center', marginTop: 40 }}>
           <ErrorView msg={'No orders found.'} />
         </View>
       ) : (
         <FlatList
-          data={filteredOrders}
+          data={orders}
           keyExtractor={(item) => item._id}
           renderItem={renderOrder}
           refreshControl={

@@ -31,7 +31,12 @@ export default function ProductsScreen() {
       if (!token || !userUID) throw new Error('User not authenticated');
       // Fetch products for this merchant
       const res = await getItems('products', { merchant: userUID });
-      setProducts(res?.data?.products || []);
+      const productsData = res?.data?.data?.data;
+      console.log('====================================');
+      console.log('Fetched Products:', productsData);
+      console.log('Merchant UID:', userUID);
+      console.log('====================================');
+      setProducts(productsData);
     } catch (err) {
       setError(err.message || 'Failed to fetch products');
     }

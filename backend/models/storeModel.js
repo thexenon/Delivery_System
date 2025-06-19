@@ -20,6 +20,7 @@ const storeSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'A merchant ID must be set'],
+      unique: true,
     },
     image: {
       type: String,
@@ -91,6 +92,7 @@ const storeSchema = new mongoose.Schema(
 );
 
 storeSchema.index({ location: '2dsphere' });
+storeSchema.index({ merchant: 1 });
 storeSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'store',

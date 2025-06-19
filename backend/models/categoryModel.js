@@ -5,6 +5,8 @@ const categorySchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, 'Category can not be empty!'],
+      unique: true,
+      trim: true,
     },
     subcategory: [
       {

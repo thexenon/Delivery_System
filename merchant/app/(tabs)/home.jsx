@@ -13,6 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { getItems, updateItem } from '../utils/api';
 import ErrorView from '../../components/ErrorView';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 
 const ORDER_STATUSES = [
   'all',
@@ -195,6 +197,85 @@ export default function HomeScreen() {
       </View>
     );
   };
+
+  useEffect(() => {
+    // Request notification permissions on mount
+    const requestPermissions = async () => {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        Alert.alert(
+          'Permission required',
+          'Please enable notifications in your settings to receive order alerts.'
+        );
+      }
+    };
+    requestPermissions();
+
+    // Set notification handler for foreground (in-app) notifications
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }, []);
+
+  useEffect(() => {
+    let lastOrderIds = [];
+    let intervalId;
+
+    const checkForNewOrders = async () => {
+      try {
+        const token = await AsyncStorage.getItem('jwt');
+        const userUID = await AsyncStorage.getItem('userUID');
+        if (!token || !userUID) return;
+        const data = await getItems('orders', { merchant: userUID }, token);
+        const fetchedOrders = data.data.orders || [];
+        const fetchedOrderIds = fetchedOrders.map((o) => o._id);
+        // On first run, just set the ids
+        if (lastOrderIds.length === 0) {
+          lastOrderIds = fetchedOrderIds;
+          return;
+        }
+        // Find new orders
+        const newOrderIds = fetchedOrderIds.filter(
+          (id) => !lastOrderIds.includes(id)
+        );
+        if (newOrderIds.length > 0) {
+          // Send notification for each new order
+          newOrderIds.forEach((id) => {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: 'New Order',
+                body: 'A new order has been placed!',
+                sound: true,
+              },
+              trigger: null, // Immediate notification
+            });
+          });
+          lastOrderIds = fetchedOrderIds;
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+
+    // Start polling every 15 seconds
+    intervalId = setInterval(checkForNewOrders, 15000);
+    // Initial fetch
+    checkForNewOrders();
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <View style={styles.container}>

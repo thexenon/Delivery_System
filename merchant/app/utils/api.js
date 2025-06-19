@@ -67,6 +67,20 @@ export const submitPost = async (reqData, reqParams) => {
   }
 };
 
+export const submitUserUpdate = async (reqData, reqParams) => {
+  const headers = await getHeadersWithJwt();
+  try {
+    const result = await ApiManager(`/api/v1/${reqParams}`, {
+      method: 'PATCH',
+      headers,
+      data: reqData,
+    });
+    return result;
+  } catch (error) {
+    return error.response.data;
+  }
+};
+
 export const getItems = async (reqParams, query = {}) => {
   const headers = await getHeadersWithJwt();
   let url = `/api/v1/${reqParams}`;

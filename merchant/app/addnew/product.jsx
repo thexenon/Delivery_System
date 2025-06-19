@@ -9,21 +9,22 @@ import {
   Alert,
   ScrollView,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { submitPost, getItems, getItemById, updateItem } from '../utils/api';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function AddProductScreen() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
+  const [store, setStore] = useState('');
   const [stock, setStock] = useState('');
-  const [brand, setBrand] = useState('');
   const [images, setImages] = useState([]); // multiple images
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -38,6 +39,11 @@ export default function AddProductScreen() {
   const [productOptions, setProductOptions] = useState([]); // [{name, options: [{name, additionalCost}], required}]
   const [productId, setProductId] = useState(null);
   const [initialLoading, setInitialLoading] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [subcategoryOpen, setSubcategoryOpen] = useState(false);
+  const [categoryItems, setCategoryItems] = useState([]);
+  const [subcategoryItems, setSubcategoryItems] = useState([]);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -45,10 +51,15 @@ export default function AddProductScreen() {
     const fetchCategories = async () => {
       try {
         const res = await getItems('categories');
-        setCategories(res?.data?.data || []);
-        console.log('====================================');
-        console.log('Categories', res);
-        console.log('====================================');
+        const cats = res?.data?.data.data || [];
+        setCategories(cats);
+        setCategoryItems(
+          cats.map((cat) => ({
+            label: cat.name,
+            value: String(cat._id),
+            subcategories: cat.subcategory || [],
+          }))
+        );
       } catch (err) {
         // Optionally handle error
       }
@@ -57,29 +68,44 @@ export default function AddProductScreen() {
   }, []);
 
   useEffect(() => {
-    // Load subcategories when category changes
-    const fetchSubCategories = async () => {
-      if (!selectedCategory) {
-        setSubCategories([]);
-        setSelectedSubCategory('');
-        return;
-      }
+    const fetchStoreID = async () => {
       try {
-        const res = await getItems('subcategories', {
-          category: selectedCategory,
-        });
-        setSubCategories(res?.data?.subcategories || []);
-        console.log('====================================');
-        console.log('Sub Categories', subCategories);
-        console.log('====================================');
-        setSelectedSubCategory('');
+        const merchant = await AsyncStorage.getItem('userUID');
+        const res = await getItems('stores?merchant=' + merchant);
+        const storeId = res?.data?.data?.data[0]._id;
+        setStore(storeId);
       } catch (err) {
-        setSubCategories([]);
-        setSelectedSubCategory('');
+        // Optionally handle error
       }
     };
-    fetchSubCategories();
-  }, [selectedCategory]);
+    fetchStoreID();
+  }, []);
+
+  useEffect(() => {
+    // When selectedCategory changes, update subCategories from categories array
+    if (!selectedCategory) {
+      setSubCategories([]);
+      setSubcategoryItems([]);
+      setSelectedSubCategory('');
+      return;
+    }
+    const selectedCat = categories.find(
+      (cat) => String(cat._id) === String(selectedCategory)
+    );
+    if (selectedCat && Array.isArray(selectedCat.subcategory)) {
+      setSubCategories(selectedCat.subcategory);
+      setSubcategoryItems(
+        selectedCat.subcategory.map((sub) => ({
+          label: sub.name || String(sub),
+          value: sub._id ? String(sub._id) : String(sub),
+        }))
+      );
+    } else {
+      setSubCategories([]);
+      setSubcategoryItems([]);
+    }
+    setSelectedSubCategory('');
+  }, [selectedCategory, categories]);
 
   useEffect(() => {
     // Check for productId in router params for edit mode
@@ -100,7 +126,6 @@ export default function AddProductScreen() {
           setSelectedCategory(prod.category?._id || prod.category || '');
           setSelectedSubCategory(prod.subcategory || prod.subCategory || '');
           setStock(prod.stock ? prod.stock.toString() : '');
-          setBrand(prod.brand || '');
           setImages(prod.images || []);
           setDuration(prod.duration ? prod.duration.toString() : '');
           setMaxOrder(prod.maxOrder ? prod.maxOrder.toString() : '');
@@ -113,31 +138,45 @@ export default function AddProductScreen() {
   }, [router]);
 
   const handlePickImages = async () => {
+    if (images.length >= 10) {
+      Alert.alert('Limit Reached', 'You can only upload up to 10 images.');
+      return;
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
-      selectionLimit: 5,
+      selectionLimit: 10 - images.length,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImages([...images, ...result.assets.map((a) => a.uri)]);
+      const newImages = result.assets.map((a) => a.uri);
+      if (images.length + newImages.length > 10) {
+        Alert.alert('Limit Reached', 'You can only upload up to 10 images.');
+        setImages([...images, ...newImages.slice(0, 10 - images.length)]);
+      } else {
+        setImages([...images, ...newImages]);
+      }
     }
   };
 
   // Cloudinary upload helper
   const uploadImagesToCloudinary = async (uris) => {
     const urls = [];
-    for (let uri of uris) {
+
+    for (let i = 0; i < uris.length; i++) {
+      const uri = uris[i];
       const formData = new FormData();
+      // Use product name and index for image name
+      const cleanName = name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       formData.append('file', {
         uri,
         type: 'image/jpeg',
-        name: `upload_${name}.jpg`,
+        name: `${cleanName}_${i + 1}.jpg`,
       });
       formData.append('upload_preset', 'Server Images');
-      formData.append('folder', 'Cassiel/Products');
+      formData.append('folder', `Cassiel/Products/${cleanName}`);
 
       try {
         const res = await fetch(
@@ -230,6 +269,7 @@ export default function AddProductScreen() {
         imageUrls = images;
       }
       const merchant = await AsyncStorage.getItem('userUID');
+
       const productData = {
         name,
         description,
@@ -237,13 +277,13 @@ export default function AddProductScreen() {
         price: parseFloat(price),
         priceDiscount: priceDiscount ? parseFloat(priceDiscount) : undefined,
         category: selectedCategory,
-        subCategory: selectedSubCategory,
+        subcategory: selectedSubCategory,
         stock: parseInt(stock),
         duration: parseInt(duration),
         maxOrder: parseInt(maxOrder),
-        brand,
         images: imageUrls,
         merchant,
+        store: store,
         varieties: varieties.map((v) => ({
           name: v.name,
           priceDifference: parseFloat(v.priceDifference) || 0,
@@ -289,292 +329,297 @@ export default function AddProductScreen() {
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
     >
-      <Text style={styles.title}>Add New Product</Text>
-      <TouchableOpacity style={styles.imagePicker} onPress={handlePickImages}>
-        <Ionicons name="images" size={32} color="#4f8cff" />
-        <Text style={{ color: '#4f8cff', marginTop: 4 }}>Select Images</Text>
-      </TouchableOpacity>
-      <View style={styles.imagesPreviewRow}>
-        {images.map((img, idx) => (
-          <View key={idx} style={styles.imageWrapper}>
-            <Image source={{ uri: img }} style={styles.imagePreview} />
-            <TouchableOpacity
-              style={styles.removeImageBtn}
-              onPress={() => handleRemoveImage(idx)}
-            >
-              <Ionicons name="close-circle" size={20} color="#e74c3c" />
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-      <TextInput
-        style={styles.input}
-        placeholder="Product Name"
-        placeholderTextColor="#aaa"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        placeholder="Description"
-        placeholderTextColor="#aaa"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Price"
-        placeholderTextColor="#aaa"
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="decimal-pad"
-      />
-      {/* Category Picker */}
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedCategory}
-          onValueChange={(itemValue) => {
-            setSelectedCategory(itemValue);
-            setSelectedSubCategory('');
-          }}
-          style={styles.picker}
-          mode="dropdown"
-        >
-          <Picker.Item label="Select Category" value="" />
-          {categories.map((cat) => (
-            <Picker.Item
-              key={cat._id}
-              label={cat.name}
-              value={cat._id.toString()}
-            />
-          ))}
-        </Picker>
-      </View>
-      {/* SubCategory Picker */}
-      {subCategories.length > 0 && (
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedSubCategory}
-            onValueChange={(itemValue) => setSelectedSubCategory(itemValue)}
-            style={styles.picker}
-            mode="dropdown"
-          >
-            <Picker.Item label="Select Subcategory" value="" />
-            {subCategories.map((sub) => (
-              <Picker.Item
-                key={sub._id}
-                label={sub.name}
-                value={sub._id.toString()}
-              />
-            ))}
-          </Picker>
-        </View>
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Stock"
-        placeholderTextColor="#aaa"
-        value={stock}
-        onChangeText={setStock}
-        keyboardType="number-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Brand (optional)"
-        placeholderTextColor="#aaa"
-        value={brand}
-        onChangeText={setBrand}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Summary"
-        placeholderTextColor="#aaa"
-        value={summary}
-        onChangeText={setSummary}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Duration (packing time in minutes)"
-        placeholderTextColor="#aaa"
-        value={duration}
-        onChangeText={setDuration}
-        keyboardType="number-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Max Order"
-        placeholderTextColor="#aaa"
-        value={maxOrder}
-        onChangeText={setMaxOrder}
-        keyboardType="number-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Discount Price (optional)"
-        placeholderTextColor="#aaa"
-        value={priceDiscount}
-        onChangeText={setPriceDiscount}
-        keyboardType="decimal-pad"
-      />
-      {/* Varieties Section */}
-      <View style={{ width: '100%', marginBottom: 16 }}>
-        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Varieties</Text>
-        {varieties.map((v, idx) => (
-          <View
-            key={idx}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 4,
-            }}
-          >
-            <TextInput
-              style={[styles.input, { flex: 1, marginBottom: 0 }]}
-              placeholder="Variety Name"
-              value={v.name}
-              onChangeText={(val) => updateVariety(idx, 'name', val)}
-            />
-            <TextInput
-              style={[
-                styles.input,
-                { flex: 1, marginBottom: 0, marginLeft: 4 },
-              ]}
-              placeholder="Price Difference"
-              value={v.priceDifference}
-              onChangeText={(val) => updateVariety(idx, 'priceDifference', val)}
-              keyboardType="decimal-pad"
-            />
-            <TouchableOpacity
-              onPress={() => removeVariety(idx)}
-              style={{ marginLeft: 4 }}
-            >
-              <Ionicons name="close-circle" size={20} color="#e74c3c" />
-            </TouchableOpacity>
-          </View>
-        ))}
-        <TouchableOpacity onPress={addVariety} style={{ marginTop: 4 }}>
-          <Text style={{ color: '#4f8cff' }}>+ Add Variety</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Add New Product</Text>
+        <TouchableOpacity style={styles.imagePicker} onPress={handlePickImages}>
+          <Ionicons name="images" size={32} color="#4f8cff" />
+          <Text style={{ color: '#4f8cff', marginTop: 4 }}>Select Images</Text>
         </TouchableOpacity>
-      </View>
-      {/* Product Options Section */}
-      <View style={{ width: '100%', marginBottom: 16 }}>
-        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
-          Product Options
-        </Text>
-        {productOptions.map((po, pIdx) => (
+        <View style={styles.imagesPreviewRow}>
+          {images.map((img, idx) => (
+            <View key={idx} style={styles.imageWrapper}>
+              <Image source={{ uri: img }} style={styles.imagePreview} />
+              <TouchableOpacity
+                style={styles.removeImageBtn}
+                onPress={() => handleRemoveImage(idx)}
+              >
+                <Ionicons name="close-circle" size={20} color="#e74c3c" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Product Name"
+          placeholderTextColor="#aaa"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description Summary"
+          placeholderTextColor="#aaa"
+          value={summary}
+          onChangeText={setSummary}
+        />
+        <TextInput
+          style={[styles.input, { height: 80 }]}
+          placeholder="Description"
+          placeholderTextColor="#aaa"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Price"
+          placeholderTextColor="#aaa"
+          value={price}
+          onChangeText={setPrice}
+          keyboardType="decimal-pad"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Discount Price || This should be a lower price"
+          placeholderTextColor="#aaa"
+          value={priceDiscount}
+          onChangeText={setPriceDiscount}
+          keyboardType="decimal-pad"
+        />
+        {/* Category Picker */}
+        <View
+          style={{
+            width: '100%',
+            marginBottom: 16,
+            zIndex: categoryOpen ? 3000 : 100,
+          }}
+        >
+          <DropDownPicker
+            open={categoryOpen}
+            value={selectedCategory}
+            items={categoryItems}
+            setOpen={setCategoryOpen}
+            setValue={setSelectedCategory}
+            setItems={setCategoryItems}
+            placeholder="Select Category"
+            style={{ marginBottom: 8 }}
+            zIndex={categoryOpen ? 3000 : 100}
+            listMode="SCROLLVIEW"
+          />
+        </View>
+        {/* SubCategory Picker */}
+        {subcategoryItems.length > 0 && (
           <View
-            key={pIdx}
             style={{
-              borderWidth: 1,
-              borderColor: '#e0e0e0',
-              borderRadius: 8,
-              padding: 8,
-              marginBottom: 8,
+              width: '100%',
+              marginBottom: 16,
+              zIndex: subcategoryOpen ? 2000 : 99,
             }}
           >
-            <TextInput
-              style={[styles.input, { marginBottom: 4 }]}
-              placeholder="Option Group Name"
-              value={po.name}
-              onChangeText={(val) => updateProductOption(pIdx, 'name', val)}
+            <DropDownPicker
+              open={subcategoryOpen}
+              value={selectedSubCategory}
+              items={subcategoryItems}
+              setOpen={setSubcategoryOpen}
+              setValue={setSelectedSubCategory}
+              setItems={setSubcategoryItems}
+              placeholder="Select Subcategory"
+              style={{ marginBottom: 8 }}
+              zIndex={subcategoryOpen ? 2000 : 99}
+              listMode="SCROLLVIEW"
             />
+          </View>
+        )}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Stock"
+          placeholderTextColor="#aaa"
+          value={stock}
+          onChangeText={setStock}
+          keyboardType="number-pad"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Duration (packing time in minutes)"
+          placeholderTextColor="#aaa"
+          value={duration}
+          onChangeText={setDuration}
+          keyboardType="number-pad"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Max Order Quantity"
+          placeholderTextColor="#aaa"
+          value={maxOrder}
+          onChangeText={setMaxOrder}
+          keyboardType="number-pad"
+        />
+        {/* Varieties Section */}
+        <View style={{ width: '100%', marginBottom: 16 }}>
+          <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>Varieties</Text>
+          {varieties.map((v, idx) => (
             <View
+              key={idx}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 marginBottom: 4,
               }}
             >
-              <Text style={{ marginRight: 8 }}>Required?</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  updateProductOption(pIdx, 'required', !po.required)
+              <TextInput
+                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                placeholder="Variety Name"
+                value={v.name}
+                onChangeText={(val) => updateVariety(idx, 'name', val)}
+              />
+              <TextInput
+                style={[
+                  styles.input,
+                  { flex: 1, marginBottom: 0, marginLeft: 4 },
+                ]}
+                placeholder="Price Difference"
+                value={v.priceDifference}
+                onChangeText={(val) =>
+                  updateVariety(idx, 'priceDifference', val)
                 }
+                keyboardType="decimal-pad"
+              />
+              <TouchableOpacity
+                onPress={() => removeVariety(idx)}
+                style={{ marginLeft: 4 }}
               >
-                <Ionicons
-                  name={po.required ? 'checkbox' : 'square-outline'}
-                  size={20}
-                  color="#4f8cff"
-                />
+                <Ionicons name="close-circle" size={20} color="#e74c3c" />
               </TouchableOpacity>
             </View>
-            {po.options.map((opt, oIdx) => (
+          ))}
+          <TouchableOpacity onPress={addVariety} style={{ marginTop: 4 }}>
+            <Text style={{ color: '#4f8cff' }}>+ Add Variety</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Product Options Section */}
+        <View style={{ width: '100%', marginBottom: 16 }}>
+          <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
+            Product Options
+          </Text>
+          {productOptions.map((po, pIdx) => (
+            <View
+              key={pIdx}
+              style={{
+                borderWidth: 1,
+                borderColor: '#e0e0e0',
+                borderRadius: 8,
+                padding: 8,
+                marginBottom: 8,
+              }}
+            >
+              <TextInput
+                style={[styles.input, { marginBottom: 4 }]}
+                placeholder="Option Group Name"
+                value={po.name}
+                onChangeText={(val) => updateProductOption(pIdx, 'name', val)}
+              />
               <View
-                key={oIdx}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   marginBottom: 4,
                 }}
               >
-                <TextInput
-                  style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                  placeholder="Option Name"
-                  value={opt.name}
-                  onChangeText={(val) =>
-                    updateOptionInProductOption(pIdx, oIdx, 'name', val)
-                  }
-                />
-                <TextInput
-                  style={[
-                    styles.input,
-                    { flex: 1, marginBottom: 0, marginLeft: 4 },
-                  ]}
-                  placeholder="Additional Cost"
-                  value={opt.additionalCost}
-                  onChangeText={(val) =>
-                    updateOptionInProductOption(
-                      pIdx,
-                      oIdx,
-                      'additionalCost',
-                      val
-                    )
-                  }
-                  keyboardType="decimal-pad"
-                />
+                <Text style={{ marginRight: 8 }}>Required?</Text>
                 <TouchableOpacity
-                  onPress={() => removeOptionFromProductOption(pIdx, oIdx)}
-                  style={{ marginLeft: 4 }}
+                  onPress={() =>
+                    updateProductOption(pIdx, 'required', !po.required)
+                  }
                 >
-                  <Ionicons name="close-circle" size={20} color="#e74c3c" />
+                  <Ionicons
+                    name={po.required ? 'checkbox' : 'square-outline'}
+                    size={20}
+                    color="#4f8cff"
+                  />
                 </TouchableOpacity>
               </View>
-            ))}
-            <TouchableOpacity
-              onPress={() => addOptionToProductOption(pIdx)}
-              style={{ marginTop: 4 }}
-            >
-              <Text style={{ color: '#4f8cff' }}>+ Add Option</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => removeProductOption(pIdx)}
-              style={{ marginTop: 4 }}
-            >
-              <Text style={{ color: '#e74c3c' }}>Remove Option Group</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-        <TouchableOpacity onPress={addProductOption} style={{ marginTop: 4 }}>
-          <Text style={{ color: '#4f8cff' }}>+ Add Product Option Group</Text>
+              {po.options.map((opt, oIdx) => (
+                <View
+                  key={oIdx}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 4,
+                  }}
+                >
+                  <TextInput
+                    style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                    placeholder="Option Name"
+                    value={opt.name}
+                    onChangeText={(val) =>
+                      updateOptionInProductOption(pIdx, oIdx, 'name', val)
+                    }
+                  />
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { flex: 1, marginBottom: 0, marginLeft: 4 },
+                    ]}
+                    placeholder="Additional Cost"
+                    value={opt.additionalCost}
+                    onChangeText={(val) =>
+                      updateOptionInProductOption(
+                        pIdx,
+                        oIdx,
+                        'additionalCost',
+                        val
+                      )
+                    }
+                    keyboardType="decimal-pad"
+                  />
+                  <TouchableOpacity
+                    onPress={() => removeOptionFromProductOption(pIdx, oIdx)}
+                    style={{ marginLeft: 4 }}
+                  >
+                    <Ionicons name="close-circle" size={20} color="#e74c3c" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity
+                onPress={() => addOptionToProductOption(pIdx)}
+                style={{ marginTop: 4 }}
+              >
+                <Text style={{ color: '#4f8cff' }}>+ Add Option</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => removeProductOption(pIdx)}
+                style={{ marginTop: 4 }}
+              >
+                <Text style={{ color: '#e74c3c' }}>Remove Option Group</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <TouchableOpacity onPress={addProductOption} style={{ marginTop: 4 }}>
+            <Text style={{ color: '#4f8cff' }}>+ Add Product Option Group</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Add Product</Text>
+          )}
         </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Add Product</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

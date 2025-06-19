@@ -17,9 +17,6 @@ import { getItems } from '../utils/api';
 import ErrorView from '../../components/ErrorView';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { BarChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
-import { G, Rect, Text as SVGText } from 'react-native-svg';
-import { PieChart } from 'react-native-svg-charts';
 import * as XLSX from 'xlsx';
 
 export default function ProfileScreen() {
@@ -262,33 +259,13 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      style={{ flex: 1, backgroundColor: '#f6f8fa' }}
+      contentContainerStyle={{ padding: 24, paddingBottom: 60 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      keyboardShouldPersistTaps="handled"
     >
-      <View style={styles.profileCard}>
-        <Image
-          source={
-            user.image ? { uri: user.image } : require('../../assets/logo.png')
-          }
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>{user.name}</Text>
-        <Text style={styles.email}>
-          <Ionicons name="mail-outline" size={16} /> {user.email}
-        </Text>
-        <Text style={styles.info}>
-          <Ionicons name="call-outline" size={16} /> {user.phone}
-        </Text>
-        <Text style={styles.info}>
-          <Ionicons name="location-outline" size={16} /> {user.address}
-        </Text>
-        <TouchableOpacity style={styles.editBtn} onPress={handleEdit}>
-          <Ionicons name="create-outline" size={18} color="#4f8cff" />
-          <Text style={styles.editText}>Edit Profile</Text>
-        </TouchableOpacity>
-      </View>
       <View style={styles.statsCard}>
         <Text style={styles.statsTitle}>Sales Statistics</Text>
         <View style={styles.statsRow}>
@@ -339,59 +316,6 @@ export default function ProfileScreen() {
           <Ionicons name="download-outline" size={18} color="#4f8cff" />
           <Text style={styles.exportText}>Export Sales (Excel)</Text>
         </TouchableOpacity>
-        <Text style={styles.statsSubtitle}>Daily Sales (Last 7 Days)</Text>
-        <View style={{ flexDirection: 'row', height: 120, marginBottom: 16 }}>
-          <YAxis
-            data={dailySalesData}
-            contentInset={{ top: 10, bottom: 10 }}
-            svg={{ fontSize: 10, fill: '#888' }}
-            numberOfTicks={4}
-            formatLabel={(value) => `₦${value}`}
-          />
-          <BarChart
-            style={{ flex: 1, marginLeft: 8 }}
-            data={dailySalesData}
-            svg={{ fill: '#4f8cff' }}
-            contentInset={{ top: 10, bottom: 10 }}
-            spacingInner={0.3}
-          >
-            <Grid direction={Grid.Direction.HORIZONTAL} />
-          </BarChart>
-        </View>
-        <Text style={styles.statsSubtitle}>Sales by Store (Pie Chart)</Text>
-        <View
-          style={{
-            height: 180,
-            marginBottom: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {salesByStore.length === 0 ? (
-            <Text style={styles.statsLabel}>No sales yet.</Text>
-          ) : (
-            <PieChart
-              style={{ height: 160, width: 160 }}
-              data={salesByStore.map(([store, amt], idx) => ({
-                value: amt,
-                svg: {
-                  fill: [
-                    '#4f8cff',
-                    '#27ae60',
-                    '#f39c12',
-                    '#e74c3c',
-                    '#8e44ad',
-                    '#16a085',
-                  ][idx % 6],
-                },
-                key: `pie-${store}`,
-              }))}
-              innerRadius={30}
-              outerRadius={80}
-              padAngle={0.03}
-            />
-          )}
-        </View>
         <Text style={styles.statsSubtitle}>Top Selling Products</Text>
         {topProducts.length === 0 ? (
           <Text style={styles.statsLabel}>No sales yet.</Text>
@@ -413,6 +337,28 @@ export default function ProfileScreen() {
           ))
         )}
       </View>
+      <View style={styles.profileCard}>
+        <Image
+          source={
+            user.image ? { uri: user.image } : require('../../assets/logo.png')
+          }
+          style={styles.avatar}
+        />
+        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.email}>
+          <Ionicons name="mail-outline" size={16} /> {user.email}
+        </Text>
+        <Text style={styles.info}>
+          <Ionicons name="call-outline" size={16} /> {user.phone}
+        </Text>
+        <Text style={styles.info}>
+          <Ionicons name="location-outline" size={16} /> {user.address}
+        </Text>
+        <TouchableOpacity style={styles.editBtn} onPress={handleEdit}>
+          <Ionicons name="create-outline" size={18} color="#4f8cff" />
+          <Text style={styles.editText}>Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text style={styles.logoutText}>Logout</Text>
@@ -425,10 +371,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f6f8fa',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    marginTop: 20,
   },
   profileCard: {
     backgroundColor: '#fff',

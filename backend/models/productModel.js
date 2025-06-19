@@ -15,6 +15,11 @@ const productSchema = new mongoose.Schema(
         'A product name must have more or equal then 10 characters',
       ],
     },
+    merchant: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Product should have a Merchant'],
+    },
     store: {
       type: mongoose.Schema.ObjectId,
       ref: 'Store',
@@ -129,6 +134,7 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ price: 1 });
+productSchema.index({ merchant: 1 });
 
 productSchema.pre(/^find/, function (next) {
   this.finalprice = this.priceDiscount * 1.08 || this.price * 1.08;
