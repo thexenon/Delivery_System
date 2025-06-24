@@ -27,6 +27,11 @@ const categorySchema = new mongoose.Schema(
   },
 );
 
+categorySchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 const Category = mongoose.model('Category', categorySchema);
 
 module.exports = Category;

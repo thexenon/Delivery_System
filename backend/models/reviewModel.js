@@ -78,6 +78,11 @@ reviewSchema.statics.calcAverageRatings = async function (storeId) {
   }
 };
 
+reviewSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 reviewSchema.post('save', function () {
   // this points to current review
   this.constructor.calcAverageRatings(this.store);

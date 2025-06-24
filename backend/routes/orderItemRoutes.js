@@ -9,7 +9,7 @@ router
   .get(orderItemController.getAllOrderItems)
   .post(
     authController.protect,
-    authController.restrictTo('user'),
+    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
     orderItemController.setRequiredIds,
     orderItemController.createOrderItem,
   );
@@ -19,12 +19,19 @@ router
   .get(orderItemController.getOrderItem)
   .patch(
     authController.protect,
-    authController.restrictTo('user', 'rider', 'merchant'),
+    authController.restrictTo(
+      'user',
+      'rider',
+      'merchant',
+      'admin',
+      'superadmin',
+      'creator',
+    ),
     orderItemController.updateOrderItem,
   )
   .delete(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'creator'),
+    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
     orderItemController.deleteOrderItem,
   );
 

@@ -58,7 +58,7 @@ export default function AddStoreScreen() {
       name: `upload_${name}.jpg`,
     });
     formData.append('upload_preset', 'Server Images');
-    formData.append('folder', 'Cassiel/Store Images');
+    formData.append('folder', `Cassiel/Store Images/${name}`);
 
     try {
       const res = await fetch(

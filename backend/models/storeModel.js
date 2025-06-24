@@ -7,10 +7,7 @@ const storeSchema = new mongoose.Schema(
       required: [true, 'A name must be set'],
       trim: true,
       unique: true,
-      minlength: [
-        10,
-        'A store name must have more or equal than 10 characters',
-      ],
+      minlength: [8, 'A store name must have more or equal than 8 characters'],
       maxlength: [
         70,
         'A store name must have less or equal than 50 characters',
@@ -20,6 +17,10 @@ const storeSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: [true, 'A merchant ID must be set'],
+    },
+    owner: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
       unique: true,
     },
     image: {
@@ -79,8 +80,8 @@ const storeSchema = new mongoose.Schema(
             'Sunday',
           ],
         },
-        open: { type: String, required: true },
-        close: { type: String, required: true },
+        open: { type: String },
+        close: { type: String },
       },
     ],
   },
@@ -92,11 +93,35 @@ const storeSchema = new mongoose.Schema(
 );
 
 storeSchema.index({ location: '2dsphere' });
-storeSchema.index({ merchant: 1 });
+storeSchema.index({ merchant: 1 }, { unique: true });
+
 storeSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'store',
   localField: '_id',
+});
+
+storeSchema.virtual('products', {
+  ref: 'Product',
+  foreignField: 'store',
+  localField: '_id',
+});
+
+storeSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
+storeSchema.pre('save', function (next) {
+  // Ensure the coordinates are in the correct format
+  if (this.location && this.location.coordinates) {
+    this.location.coordinates = [
+      parseFloat(this.location.coordinates[0]),
+      parseFloat(this.location.coordinates[1]),
+    ];
+  }
+  this.owner = this.merchant;
+  next();
 });
 
 const Store = mongoose.model('Store', storeSchema);

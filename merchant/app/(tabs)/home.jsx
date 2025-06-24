@@ -279,7 +279,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📦 Orders</Text>
+      <Text style={styles.title}>🛒 Incoming Orders</Text>
       <View style={styles.filterRow}>
         {ORDER_STATUSES.map((status) => (
           <TouchableOpacity

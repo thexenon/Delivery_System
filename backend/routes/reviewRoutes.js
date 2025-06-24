@@ -9,7 +9,7 @@ router
   .get(reviewController.getAllReviews)
   .post(
     authController.protect,
-    authController.restrictTo('user'),
+    authController.restrictTo('user', 'superadmin', 'creator'),
     reviewController.setRequiredIds,
     reviewController.createReview,
   );
@@ -19,7 +19,7 @@ router
   .get(reviewController.getReview)
   .patch(
     authController.protect,
-    authController.restrictTo('user'),
+    authController.restrictTo('user', 'superadmin', 'creator'),
     reviewController.updateReview,
   )
   .delete(

@@ -21,6 +21,10 @@ const orderItemSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Order Item must belong to a product.'],
     },
+    rider: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+    },
     amount: {
       type: Number,
       required: [true, 'Amount must be set'],
@@ -33,6 +37,26 @@ const orderItemSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    variety: {
+      type: String,
+    },
+    orderoptions: [
+      {
+        name: {
+          type: String,
+        },
+        options: [
+          {
+            optionname: {
+              type: String,
+            },
+            quantity: {
+              type: Number,
+            },
+          },
+        ],
+      },
+    ],
     status: {
       type: String,
       default: 'pending',
@@ -65,11 +89,16 @@ const orderItemSchema = new mongoose.Schema(
 orderItemSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
-    select: 'name phone',
-  }).populate({
-    path: 'product',
-    select: 'name priceDiscount',
-  });
+    select: 'name phone location address image',
+  })
+    .populate({
+      path: 'rider',
+      select: 'name phone image location',
+    })
+    .populate({
+      path: 'product',
+      select: 'name priceDiscount',
+    });
   next();
 });
 

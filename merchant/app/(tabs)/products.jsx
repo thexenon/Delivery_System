@@ -32,10 +32,6 @@ export default function ProductsScreen() {
       // Fetch products for this merchant
       const res = await getItems('products', { merchant: userUID });
       const productsData = res?.data?.data?.data;
-      console.log('====================================');
-      console.log('Fetched Products:', productsData);
-      console.log('Merchant UID:', userUID);
-      console.log('====================================');
       setProducts(productsData);
     } catch (err) {
       setError(err.message || 'Failed to fetch products');
@@ -54,7 +50,7 @@ export default function ProductsScreen() {
   };
 
   const handleEdit = (id) => {
-    router.push({ pathname: '../addnew/product', params: { productId: id } });
+    router.push({ pathname: '../addnew/product', params: { productUID: id } });
   };
   const handleView = (id) => {
     router.push({ pathname: '../details/product', params: { productId: id } });
@@ -145,7 +141,7 @@ export default function ProductsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🛒 Products</Text>
+      <Text style={styles.title}>📦 Products</Text>
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.addBtn}

@@ -11,8 +11,8 @@ const productSchema = new mongoose.Schema(
         'A product name must have less or equal then 50 characters',
       ],
       minlength: [
-        10,
-        'A product name must have more or equal then 10 characters',
+        8,
+        'A product name must have more or equal then 8 characters',
       ],
     },
     merchant: {
@@ -52,12 +52,6 @@ const productSchema = new mongoose.Schema(
     },
     priceDiscount: {
       type: Number,
-      validate: {
-        validator: function (val) {
-          return val < this.price;
-        },
-        message: 'Discount price ({VALUE}) should be below regular price',
-      },
     },
     summary: {
       type: String,
@@ -135,10 +129,14 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ price: 1 });
 productSchema.index({ merchant: 1 });
+productSchema.index({ store: 1 });
 
-productSchema.pre(/^find/, function (next) {
-  this.finalprice = this.priceDiscount * 1.08 || this.price * 1.08;
-  next();
+productSchema.virtual('priceFinal').get(function () {
+  return Math.round(this.priceDiscount * 1.05 || this.price * 1.05);
+});
+
+productSchema.virtual('priceDiscountPercent').get(function () {
+  return Math.round(((this.priceDiscount - this.price) / this.price) * 100);
 });
 
 productSchema.virtual('reviews', {

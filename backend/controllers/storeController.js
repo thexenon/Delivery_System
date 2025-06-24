@@ -7,8 +7,12 @@ exports.setRequiredIds = (req, res, next) => {
   next();
 };
 
-exports.getAllStores = factory.getAll(Store);
-exports.getStore = factory.getOne(Store);
+exports.getAllStores = factory.getAll(Store, {
+  path: 'owner reviews products',
+});
+exports.getStore = factory.getOne(Store, {
+  path: 'owner reviews products',
+});
 exports.createStore = factory.createOne(Store);
 exports.updateStore = factory.updateOne(Store);
 exports.deleteStore = factory.deleteOne(Store);

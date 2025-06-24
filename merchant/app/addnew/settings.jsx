@@ -76,7 +76,7 @@ export default function SettingsScreen() {
       name: `upload_${name}.jpg`,
     });
     formData.append('upload_preset', 'Server Images');
-    formData.append('folder', 'Cassiel/Users Images');
+    formData.append('folder', `Cassiel/Users Images/${name}`);
 
     try {
       const res = await fetch(

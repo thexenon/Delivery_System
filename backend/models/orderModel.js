@@ -69,18 +69,25 @@ const orderSchema = new mongoose.Schema(
   },
 );
 
+orderSchema.index({ location: '2dsphere' });
+
+orderSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 orderSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
-    select: 'name phone location address',
+    select: 'name phone location address image',
   })
     .populate({
       path: 'rider',
-      select: 'name phone photo',
+      select: 'name phone image location',
     })
     .populate({
       path: 'products',
-      select: 'name quantity status',
+      select: 'name images store',
     });
   next();
 });

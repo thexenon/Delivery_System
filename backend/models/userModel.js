@@ -18,8 +18,13 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       validate: [validator.isEmail, 'Provide a valid email...'],
     },
+    age: {
+      type: Number,
+      required: [true, 'An age number must be set'],
+    },
     image: {
       type: String,
+      default: 'logo.png' || 'logo.jpg',
     },
     phone: {
       type: Number,
@@ -74,6 +79,10 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+    secretUser: {
+      type: Boolean,
+      default: false,
+    },
     isVerified: { type: Boolean, default: false },
     verificationToken: String,
     verificationTokenExpiry: Date,
@@ -86,6 +95,8 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.index({ location: '2dsphere' });
+userSchema.index({ role: 1 });
+userSchema.index({ secretUser: 1 });
 
 // Document middleware before find()
 userSchema.pre(/^find/, function (next) {

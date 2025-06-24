@@ -6,7 +6,7 @@
   "author": "Derek Donkor (@thexenon)",
   "license": "ISC",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon server.js --trace-warning",
     "dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js",

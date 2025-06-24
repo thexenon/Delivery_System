@@ -26,28 +26,51 @@ const app = express();
 // Middlewares
 // 1) GLOBAL MIDDLEWARES
 // Allow Access
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:8081',
+  'http://localhost:5174',
+  'http://localhost:5173',
+];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  }),
-);
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
-  );
-  next();
-});
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log('====================================');
+    console.log('🌍 Allowed Origins:', allowedOrigins);
+    console.log('🌍 Incoming Origin:', origin);
+    console.log('====================================');
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`❌ Blocked CORS request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Allow preflight
+
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error('Not allowed by CORS'));
+//       }
+//     },
+//     credentials: true,
+//   }),
+// );
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'Origin, X-Requested-With, Content-Type, Accept',
+//   );
+//   next();
+// });
 
 // View engine
 app.set('view engine', 'pug');

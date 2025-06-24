@@ -14,12 +14,13 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { submitPost, getItems, getItemById, updateItem } from '../utils/api';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function AddProductScreen() {
+  const { productUID } = useLocalSearchParams();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -108,13 +109,12 @@ export default function AddProductScreen() {
   }, [selectedCategory, categories]);
 
   useEffect(() => {
-    // Check for productId in router params for edit mode
-    if (router && router.params && router.params.productId) {
-      setProductId(router.params.productId);
+    if (productUID) {
+      setProductId(productUID);
       setInitialLoading(true);
       (async () => {
-        const res = await getItemById('products', router.params.productId);
-        const prod = res?.data?.data;
+        const res = await getItemById('products', productUID);
+        const prod = res?.data?.data?.data;
         if (prod) {
           setName(prod.name || '');
           setDescription(prod.description || '');
@@ -173,10 +173,12 @@ export default function AddProductScreen() {
       formData.append('file', {
         uri,
         type: 'image/jpeg',
-        name: `${cleanName}_${i + 1}.jpg`,
+        name: `${selectedSubCategory}_${selectedCategory}_${store}_${
+          i + 1
+        }.jpg`,
       });
       formData.append('upload_preset', 'Server Images');
-      formData.append('folder', `Cassiel/Products/${cleanName}`);
+      formData.append('folder', `Cassiel/Product Images/${store}`);
 
       try {
         const res = await fetch(
