@@ -66,6 +66,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     phone: req.body.phone,
     image: req.body.image,
+    age: req.body.age,
+    birthday: req.body.birthday,
     email: req.body.email,
     address: req.body.address,
     location: req.body.location,

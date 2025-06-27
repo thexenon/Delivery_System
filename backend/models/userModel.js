@@ -20,9 +20,11 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
+      required: [true, 'Age is required'],
     },
     birthday: {
       type: Date,
+      required: [true, 'Date of birth is required to calculate age'],
     },
     image: {
       type: String,
@@ -59,7 +61,6 @@ const userSchema = new mongoose.Schema(
         message: 'Role is either ||merchant||user||rider||',
       },
     },
-
     address: {
       type: String,
       trim: true,
