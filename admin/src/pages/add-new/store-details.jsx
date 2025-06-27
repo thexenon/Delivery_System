@@ -29,6 +29,14 @@ export default function StoreDetails() {
     if (id) fetchAll();
   }, [id]);
 
+  // Calculate average rating from loaded reviews
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        ).toFixed(2)
+      : '-';
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -104,8 +112,8 @@ export default function StoreDetails() {
               </div>
             )}
             <div className="mb-2 text-gray-700">
-              <span className="font-semibold">Ratings:</span>{' '}
-              {store.ratingsAverage || '-'} ({store.ratingsQunatity || 0})
+              <span className="font-semibold">Ratings:</span> {averageRating} (
+              {reviews.length || 0})
             </div>
             <div className="mb-2 text-gray-700">
               <span className="font-semibold">Working Hours:</span>

@@ -46,7 +46,10 @@ reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
-    select: 'name photo',
+    select: 'name image',
+  }).populate({
+    path: 'store',
+    select: 'name image',
   });
   next();
 });
@@ -88,18 +91,18 @@ reviewSchema.post('save', function () {
   this.constructor.calcAverageRatings(this.store);
 });
 
-// findByIdAndUpdate
-// findByIdAndDelete
-reviewSchema.pre(/^findOneAnd/, async function (next) {
-  this.r = await this.findOne();
-  // console.log(this.r);
-  next();
-});
+// // findByIdAndUpdate
+// // findByIdAndDelete
+// reviewSchema.pre(/^findOneAnd/, async function (next) {
+//   this.r = await this.findOne();
+//   // console.log(this.r);
+//   next();
+// });
 
-reviewSchema.post(/^findOneAnd/, async function () {
-  // await this.findOne(); does NOT work here, query has already executed
-  await this.r.constructor.calcAverageRatings(this.r.store);
-});
+// reviewSchema.post(/^findOneAnd/, async function () {
+//   // await this.findOne(); does NOT work here, query has already executed
+//   await this.r.constructor.calcAverageRatings(this.r.store);
+// });
 
 const Review = mongoose.model('Review', reviewSchema);
 

@@ -10,7 +10,6 @@ router
   .post(
     authController.protect,
     authController.restrictTo('user', 'superadmin', 'creator'),
-    reviewController.setRequiredIds,
     reviewController.createReview,
   );
 

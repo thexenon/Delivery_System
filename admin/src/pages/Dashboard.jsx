@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchItems } from '../services/user_api';
 import { useNavigate } from 'react-router-dom';
-// You can use chart.js or recharts, but here we'll use chart.js via react-chartjs-2
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -36,7 +35,8 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   const userrole = localStorage.getItem('userrole');
-  const isAdmin = userrole === 'admin' || userrole === 'superadmin' || userrole === 'creator';
+  const isAdmin =
+    userrole === 'admin' || userrole === 'superadmin' || userrole === 'creator';
   const isSuperAdmin = userrole === 'superadmin' || userrole === 'creator';
 
   const navigate = useNavigate();
@@ -79,7 +79,9 @@ export default function Dashboard() {
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-2xl text-gray-500">You do not have access to this dashboard.</div>
+        <div className="text-2xl text-gray-500">
+          You do not have access to this dashboard.
+        </div>
       </div>
     );
   }
@@ -160,31 +162,46 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-blue-50" onClick={() => navigate('/product')}>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-blue-50"
+              onClick={() => navigate('/product')}
+            >
               <div className="text-2xl font-bold text-blue-600">
                 {stats.products}
               </div>
               <div className="text-gray-600">Products</div>
             </div>
-            <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-green-50" onClick={() => navigate('/order')}>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-green-50"
+              onClick={() => navigate('/order')}
+            >
               <div className="text-2xl font-bold text-green-600">
                 {stats.orders}
               </div>
               <div className="text-gray-600">Orders</div>
             </div>
-            <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-yellow-50" onClick={() => navigate('/orderitem')}>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-yellow-50"
+              onClick={() => navigate('/orderitem')}
+            >
               <div className="text-2xl font-bold text-yellow-600">
                 {stats.orderitems}
               </div>
               <div className="text-gray-600">Order Items</div>
             </div>
-            <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-pink-50" onClick={() => navigate('/category')}>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-pink-50"
+              onClick={() => navigate('/category')}
+            >
               <div className="text-2xl font-bold text-pink-600">
                 {stats.categories}
               </div>
               <div className="text-gray-600">Categories</div>
             </div>
-            <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-indigo-50" onClick={() => navigate('/store')}>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-indigo-50"
+              onClick={() => navigate('/store')}
+            >
               <div className="text-2xl font-bold text-indigo-600">
                 {stats.stores}
               </div>
@@ -192,13 +209,19 @@ export default function Dashboard() {
             </div>
             {isSuperAdmin && (
               <>
-                <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-amber-50" onClick={() => navigate('/admin')}>
+                <div
+                  className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-amber-50"
+                  onClick={() => navigate('/admin')}
+                >
                   <div className="text-2xl font-bold text-amber-600">
                     {stats.users}
                   </div>
                   <div className="text-gray-600">Users</div>
                 </div>
-                <div className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-violet-50" onClick={() => navigate('/review')}>
+                <div
+                  className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-violet-50"
+                  onClick={() => navigate('/review')}
+                >
                   <div className="text-2xl font-bold text-violet-600">
                     {stats.reviews}
                   </div>

@@ -29,7 +29,7 @@ export default function Product() {
     if (!window.confirm('Are you sure you want to delete this product?'))
       return;
     try {
-      await deleteItem(product, 'products');
+      await deleteItem('products', product);
       setProducts((prev) => prev.filter((p) => p._id !== product._id));
     } catch (err) {
       alert('Failed to delete product');

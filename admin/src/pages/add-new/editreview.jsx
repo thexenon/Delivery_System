@@ -83,7 +83,7 @@ export default function EditReview() {
           alert('Review updated successfully!');
           navigate('/review');
         } else {
-          throw new Error(res.data.message || 'Failed to update review');
+          throw new Error(res.message || 'Failed to update review');
         }
       });
     } catch (err) {
@@ -91,6 +91,9 @@ export default function EditReview() {
         err?.response?.data?.message ||
           'Failed to update review. Please check all fields.'
       );
+      console.log('====================================');
+      console.log(err);
+      console.log('====================================');
     }
     setLoading(false);
   };

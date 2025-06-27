@@ -176,6 +176,21 @@ export const deleteItem = async (reqParams, item) => {
   }
 };
 
+export const deleteItemm = async (reqParams) => {
+  try {
+    const result = await ApiManager(`/api/v1/${reqParams}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return result;
+  } catch (error) {
+    return error.response.data;
+  }
+};
+
 export const fetchItem = async (reqParams, id) => {
   try {
     const result = await ApiManager(`/api/v1/${reqParams}/${id}`, {

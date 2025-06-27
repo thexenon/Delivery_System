@@ -1,8 +1,29 @@
 {
   "expo": {
-    "scheme": "acme",
+    "scheme": "cassiel_merchant",
     "plugins": ["expo-router", "expo-maps"],
-    "name": "merchant",
-    "slug": "merchant"
+    "name": "cassiel_merchant",
+    "slug": "cassiel_merchant",
+    "icon": "./assets/logo.png",
+    "newArchEnabled": true,
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.optyxenon.cassiel_merchant"
+    },
+    "web": {
+      "favicon": "./assets/logo.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.optyxenon.cassiel_merchant"
+    }
   }
 }

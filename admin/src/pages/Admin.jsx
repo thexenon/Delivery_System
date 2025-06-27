@@ -31,7 +31,7 @@ export default function AdminPage() {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       const item = users.find((u) => u.id === id || u._id === id);
-      await deleteItem(item, 'users');
+      await deleteItem('users', item);
       setUsers((prev) => prev.filter((u) => u.id !== id && u._id !== id));
       alert('User deleted successfully.');
     } catch (err) {

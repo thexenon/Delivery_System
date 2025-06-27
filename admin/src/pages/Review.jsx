@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchItems, deleteItem } from '../services/user_api';
+import { fetchItems, deleteItemm } from '../services/user_api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Review() {
@@ -25,12 +25,26 @@ export default function Review() {
     getReviews();
   }, []);
 
-  const handleDelete = async (review) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     try {
-      await deleteItem('reviews', review);
-      setReviews((prev) => prev.filter((r) => r._id !== review._id));
+      const review = reviews.find((u) => u.id === id || u._id === id);
+      const res = await deleteItemm(`reviews/${id}`);
+      // .then((res) => {
+      console.log('====================================');
+      console.log(res);
+      console.log('====================================');
+      if (res.status === 204) {
+        alert('Review Deleted Successfully...');
+        setReviews((prev) => prev.filter((r) => r._id !== id));
+      } else {
+        alert(res.message || 'Failed to delete review');
+      }
+      // });
     } catch (err) {
+      console.log('====================================');
+      console.log(err.message);
+      console.log('====================================');
       alert('Failed to delete review');
     }
   };
@@ -133,7 +147,7 @@ export default function Review() {
                       </button>
                       <button
                         className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                        onClick={() => handleDelete(review)}
+                        onClick={() => handleDelete(review.id || review._id)}
                       >
                         Delete
                       </button>

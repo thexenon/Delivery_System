@@ -20,7 +20,9 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: [true, 'An age number must be set'],
+    },
+    birthday: {
+      type: Date,
     },
     image: {
       type: String,
