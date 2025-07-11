@@ -18,6 +18,11 @@ const storeRouter = require('./routes/storeRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
 const orderitemRouter = require('./routes/orderItemRoutes');
+const favoriteRouter = require('./routes/favoriteRoutes');
+const artisanShopRouter = require('./routes/artisanShopRoutes');
+const artisanReviewRouter = require('./routes/artisanReviewRoutes');
+const serviceRouter = require('./routes/serviceRoutes');
+const serviceRequestRouter = require('./routes/serviceRequestRoutes');
 const AppError = require('./utils/appError');
 const myErrorHandler = require('./controllers/errorController');
 
@@ -50,27 +55,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Allow preflight
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error('Not allowed by CORS'));
-//       }
-//     },
-//     credentials: true,
-//   }),
-// );
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept',
-//   );
-//   next();
-// });
 
 // View engine
 app.set('view engine', 'pug');
@@ -122,12 +106,17 @@ app.use((req, res, next) => {
 app.use(compression());
 // 3) Routes
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/favorites', favoriteRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/orderitems', orderitemRouter);
 app.use('/api/v1/stores', storeRouter);
+app.use('/api/v1/artisanshops', artisanShopRouter);
+app.use('/api/v1/artisanreviews', artisanReviewRouter);
+app.use('/api/v1/services', serviceRouter);
+app.use('/api/v1/servicerequests', serviceRequestRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Error: ${req.originalUrl} is not on this server`, 404));

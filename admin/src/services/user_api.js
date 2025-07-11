@@ -65,22 +65,22 @@ export const user_signup = async (reqData) => {
   }
 };
 
-export const submitComment = async (reqData, reqParams) => {
-  try {
-    const result = await ApiManager(`/api/v1/${reqParams}/comments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      data: reqData,
-      withCredentials: true,
-    });
-    return result;
-  } catch (error) {
-    return error.response.data;
-  }
-};
+// export const submitComment = async (reqData, reqParams) => {
+//   try {
+//     const result = await ApiManager(`/api/v1/${reqParams}/comments`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: `Bearer ${token}`,
+//       },
+//       data: reqData,
+//       withCredentials: true,
+//     });
+//     return result;
+//   } catch (error) {
+//     return error.response.data;
+//   }
+// };
 
 export const submitPost = async (reqData, reqParams) => {
   try {

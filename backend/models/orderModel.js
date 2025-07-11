@@ -33,6 +33,10 @@ const orderSchema = new mongoose.Schema(
         required: true,
       },
     },
+    address: {
+      type: String,
+      required: [true, 'Delivery Address must be set'],
+    },
     status: {
       type: String,
       default: 'pending',

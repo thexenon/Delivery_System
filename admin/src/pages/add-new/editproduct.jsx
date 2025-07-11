@@ -19,6 +19,7 @@ export default function EditProduct() {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [stores, setStores] = useState([]);
+  const [isVerified, setIsVerified] = useState(false);
   const [store, setStore] = useState('');
   const [summary, setSummary] = useState('');
   const [duration, setDuration] = useState('');
@@ -70,6 +71,7 @@ export default function EditProduct() {
             },
           ]
         );
+        setIsVerified(product.isVerified || false);
         setImages(product.images || []);
         setImagePreviews(
           (product.images || []).map((img) =>
@@ -111,7 +113,7 @@ export default function EditProduct() {
           'public_id',
           `${subcategory}_${category}_${store}_${idx + 1}_${ext}`
         );
-        formData.append('folder', `Cassiel/Product Images/${store}`);
+        formData.append('folder', `Elroy/Product Images/${store}`);
         const res = await fetch(
           'https://api.cloudinary.com/v1_1/du0sqginv/image/upload',
           {
@@ -154,6 +156,7 @@ export default function EditProduct() {
         duration,
         maxOrder,
         priceDiscount,
+        isVerified,
         varieties: varieties.map((v) => ({
           name: v.name,
           priceDifference: parseFloat(v.priceDifference) || 0,
@@ -411,6 +414,17 @@ export default function EditProduct() {
               required
             />
           </div>
+        </div>
+        <div className="flex-1">
+          <label className="flex items-center gap-2 mb-4">
+            {isVerified ? 'Verified' : 'Not Verified'}
+            <input
+              name="isVerified"
+              checked={isVerified}
+              onChange={(e) => setIsVerified(e.target.checked)}
+              type="checkbox"
+            />
+          </label>
         </div>
         {/* Varieties Section */}
         <div className="mb-4">

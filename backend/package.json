@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Cassiel Delivery Backend",
+  "description": "Elroy Delivery Backend",
   "main": "server.js",
   "author": "Derek Donkor (@thexenon)",
   "license": "ISC",

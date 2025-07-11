@@ -79,7 +79,7 @@ export default function AddProduct() {
             'public_id',
             `${subcategory}_${category}_${store}_${idx + 1}.${ext}`
           );
-          formData.append('folder', `Cassiel/Product Images/${store}`);
+          formData.append('folder', `Elroy/Product Images/${store}`);
           const res = await fetch(
             'https://api.cloudinary.com/v1_1/du0sqginv/image/upload',
             {

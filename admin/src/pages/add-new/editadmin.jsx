@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchItems, submitUserUpdate } from '../../services/user_api';
+import { fetchItems, submitUpdate } from '../../services/user_api';
 
 export default function EditAdmin() {
   const location = useLocation();
@@ -31,6 +31,7 @@ export default function EditAdmin() {
             name: user.name || '',
             email: user.email || '',
             phone: user.phone || '',
+            address: user.address || '',
             description: user.description || '',
             role: user.role || '',
           });
@@ -55,7 +56,7 @@ export default function EditAdmin() {
     setSaving(true);
     setMessage('');
     try {
-      const result = await submitUserUpdate(
+      const result = await submitUpdate(
         form,
         `users/${new URLSearchParams(location.search).get('id')}`
       );
@@ -112,6 +113,17 @@ export default function EditAdmin() {
           />
         </div>
         <div>
+          <label className="block font-medium">Address</label>
+          <input
+            name="address"
+            type="text"
+            value={form.address}
+            onChange={handleChange}
+            required
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div>
           <label className="block font-medium">Role</label>
           <select
             name="role"
@@ -122,6 +134,7 @@ export default function EditAdmin() {
             <option value="user">User</option>
             <option value="rider">Rider</option>
             <option value="merchant">Merchant</option>
+            <option value="artisan">Artisan</option>
             <option value="admin">Admin</option>
           </select>
         </div>

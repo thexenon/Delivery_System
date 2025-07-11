@@ -28,8 +28,12 @@ export default function Dashboard() {
     orderitems: 0,
     categories: 0,
     stores: 0,
+    artisanshops: 0,
+    requests: 0,
+    services: 0,
     users: 0,
     reviews: 0,
+    artisanreviews: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,10 +57,14 @@ export default function Dashboard() {
           fetchItems('orderitems'),
           fetchItems('categories'),
           fetchItems('stores'),
+          fetchItems('services'),
+          fetchItems('artisanshops'),
+          fetchItems('servicerequests'),
         ];
         if (isSuperAdmin) {
           promises.push(fetchItems('users'));
           promises.push(fetchItems('reviews'));
+          promises.push(fetchItems('artisanreviews'));
         }
         const results = await Promise.all(promises);
         setStats({
@@ -65,8 +73,12 @@ export default function Dashboard() {
           orderitems: results[2].data.data.data.length,
           categories: results[3].data.data.data.length,
           stores: results[4].data.data.data.length,
-          users: isSuperAdmin ? results[5].data.data.data.length : 0,
-          reviews: isSuperAdmin ? results[6].data.data.data.length : 0,
+          services: results[5].data.data.data.length,
+          artisanshops: results[6].data.data.data.length,
+          requests: results[7].data.data.data.length,
+          users: isSuperAdmin ? results[8].data.data.data.length : 0,
+          reviews: isSuperAdmin ? results[9].data.data.data.length : 0,
+          artisanreviews: isSuperAdmin ? results[10].data.data.data.length : 0,
         });
       } catch (err) {
         setError('Failed to fetch dashboard statistics');
@@ -92,8 +104,11 @@ export default function Dashboard() {
       'Orders',
       'Order Items',
       'Categories',
-      'Stores',
-      ...(isSuperAdmin ? ['Users', 'Reviews'] : []),
+      'Product Stores',
+      'Services',
+      'Artisan Shops',
+      'Service Requests',
+      ...(isSuperAdmin ? ['Users', 'Reviews', 'Artisan Reviews'] : []),
     ],
     datasets: [
       {
@@ -104,7 +119,12 @@ export default function Dashboard() {
           stats.orderitems,
           stats.categories,
           stats.stores,
-          ...(isSuperAdmin ? [stats.users, stats.reviews] : []),
+          stats.services,
+          stats.artisanshops,
+          stats.requests,
+          ...(isSuperAdmin
+            ? [stats.users, stats.reviews, stats.artisanreviews]
+            : []),
         ],
         backgroundColor: [
           '#3b82f6',
@@ -112,7 +132,10 @@ export default function Dashboard() {
           '#f59e42',
           '#f43f5e',
           '#6366f1',
-          ...(isSuperAdmin ? ['#fbbf24', '#8b5cf6'] : []),
+          '#559e42',
+          '#943f5e',
+          '#a366f1',
+          ...(isSuperAdmin ? ['#fbbf24', '#8b5cf6', '#cb5cf6'] : []),
         ],
       },
     ],
@@ -123,8 +146,11 @@ export default function Dashboard() {
       'Orders',
       'Order Items',
       'Categories',
-      'Stores',
-      ...(isSuperAdmin ? ['Users', 'Reviews'] : []),
+      'Product Stores',
+      'Services',
+      'Artisan Shops',
+      'Service Requests',
+      ...(isSuperAdmin ? ['Users', 'Reviews', 'Artisan Reviews'] : []),
     ],
     datasets: [
       {
@@ -134,7 +160,12 @@ export default function Dashboard() {
           stats.orderitems,
           stats.categories,
           stats.stores,
-          ...(isSuperAdmin ? [stats.users, stats.reviews] : []),
+          stats.services,
+          stats.artisanshops,
+          stats.requests,
+          ...(isSuperAdmin
+            ? [stats.users, stats.reviews, stats.artisanreviews]
+            : []),
         ],
         backgroundColor: [
           '#3b82f6',
@@ -142,7 +173,10 @@ export default function Dashboard() {
           '#f59e42',
           '#f43f5e',
           '#6366f1',
-          ...(isSuperAdmin ? ['#fbbf24', '#8b5cf6'] : []),
+          '#559e42',
+          '#943f5e',
+          '#a366f1',
+          ...(isSuperAdmin ? ['#fbbf24', '#8b5cf6', '#cb5cf6'] : []),
         ],
       },
     ],
@@ -207,6 +241,33 @@ export default function Dashboard() {
               </div>
               <div className="text-gray-600">Stores</div>
             </div>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-indigo-50"
+              onClick={() => navigate('/request')}
+            >
+              <div className="text-2xl font-bold text-indigo-600">
+                {stats.requests}
+              </div>
+              <div className="text-gray-600">Service Requests</div>
+            </div>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-indigo-50"
+              onClick={() => navigate('/service')}
+            >
+              <div className="text-2xl font-bold text-indigo-600">
+                {stats.services}
+              </div>
+              <div className="text-gray-600">Artisan Services</div>
+            </div>
+            <div
+              className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-indigo-50"
+              onClick={() => navigate('/shop')}
+            >
+              <div className="text-2xl font-bold text-indigo-600">
+                {stats.artisanshops}
+              </div>
+              <div className="text-gray-600">Artisan Shops</div>
+            </div>
             {isSuperAdmin && (
               <>
                 <div
@@ -226,6 +287,15 @@ export default function Dashboard() {
                     {stats.reviews}
                   </div>
                   <div className="text-gray-600">Reviews</div>
+                </div>
+                <div
+                  className="bg-white rounded shadow p-6 text-center cursor-pointer hover:bg-violet-50"
+                  onClick={() => navigate('/rating')}
+                >
+                  <div className="text-2xl font-bold text-violet-600">
+                    {stats.artisanreviews}
+                  </div>
+                  <div className="text-gray-600">Artisan Reviews</div>
                 </div>
               </>
             )}

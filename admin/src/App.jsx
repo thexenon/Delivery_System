@@ -34,6 +34,22 @@ import EditOrder from './pages/add-new/editorder';
 import OrderDetails from './pages/add-new/order-details';
 import OrderItem from './pages/OrderItem';
 import OrderItemDetails from './pages/add-new/orderitem-details';
+import Service from './pages/Service';
+import AddService from './pages/add-new/service';
+import EditService from './pages/add-new/editservice';
+import ServiceDetails from './pages/add-new/service-details';
+import Shop from './pages/Shop';
+import AddShop from './pages/add-new/shop';
+import EditShop from './pages/add-new/editshop';
+import ShopDetails from './pages/add-new/shop-details';
+import Request from './pages/Request';
+import AddRequest from './pages/add-new/request';
+import EditRequest from './pages/add-new/editrequest';
+import RequestDetails from './pages/add-new/request-details';
+import Rating from './pages/Rating';
+import AddRating from './pages/add-new/rating';
+import EditRating from './pages/add-new/editrating';
+import RatingDetails from './pages/add-new/rating-details';
 
 function SessionRedirector() {
   const location = useLocation();
@@ -85,6 +101,22 @@ function App() {
             path="/add-new/orderitem-details"
             element={<OrderItemDetails />}
           />
+          <Route path="/service" element={<Service />} />
+          <Route path="/add-new/service" element={<AddService />} />
+          <Route path="/add-new/editservice" element={<EditService />} />
+          <Route path="/add-new/service-details" element={<ServiceDetails />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/add-new/shop" element={<AddShop />} />
+          <Route path="/add-new/editshop" element={<EditShop />} />
+          <Route path="/add-new/shop-details" element={<ShopDetails />} />
+          <Route path="/request" element={<Request />} />
+          <Route path="/add-new/request" element={<AddRequest />} />
+          <Route path="/add-new/editrequest" element={<EditRequest />} />
+          <Route path="/add-new/request-details" element={<RequestDetails />} />
+          <Route path="/rating" element={<Rating />} />
+          <Route path="/add-new/rating" element={<AddRating />} />
+          <Route path="/add-new/editrating" element={<EditRating />} />
+          <Route path="/add-new/rating-details" element={<RatingDetails />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Route>
       </Routes>

@@ -5,27 +5,27 @@ import { fetchItems, submitPost } from '../../services/user_api';
 export default function AddReview() {
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(5);
-  const [store, setStore] = useState('');
-  const [product, setProduct] = useState('');
+  const [artisanShop, setArtisanShop] = useState('');
+  const [service, setService] = useState('');
   const [user, setUser] = useState('');
-  const [stores, setStores] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [artisanShops, setArtisanShops] = useState([]);
+  const [services, setServices] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch stores, products, users for dropdowns
+    // Fetch artisanShops, services, users for dropdowns
     const fetchData = async () => {
       try {
-        const [storeRes, productRes, userRes] = await Promise.all([
-          fetchItems('stores'),
-          fetchItems('products'),
+        const [artisanShopRes, serviceRes, userRes] = await Promise.all([
+          fetchItems('artisanshops'),
+          fetchItems('services'),
           fetchItems('users'),
         ]);
-        setStores(storeRes.data.data.data || []);
-        setProducts(productRes.data.data.data || []);
+        setArtisanShops(artisanShopRes.data.data.data || []);
+        setServices(serviceRes.data.data.data || []);
         setUsers(userRes.data.data.data || []);
       } catch (err) {
         setError('Failed to fetch dropdown data');
@@ -34,36 +34,39 @@ export default function AddReview() {
     fetchData();
   }, []);
 
-  // When a product is selected, auto-populate its store
+  // When a service is selected, auto-populate its artisanShop
   useEffect(() => {
-    if (product && products.length > 0) {
-      const selectedProduct = products.find((p) => p._id === product);
-      if (selectedProduct && selectedProduct.store) {
-        setStore(selectedProduct.store._id || selectedProduct.store);
+    if (service && services.length > 0) {
+      const selectedService = services.find((p) => p._id === service);
+      if (selectedService && selectedService.artisanShop) {
+        setArtisanShop(
+          selectedService.artisanShop._id || selectedService.artisanShop
+        );
       }
     }
-  }, [product, products]);
+  }, [service, services]);
 
-  // When a store is selected, filter products to only those in the store
-  const filteredProducts = store
-    ? products.filter((p) => (p.store?._id || p.store) === store)
-    : products;
+  // When a artisanShop is selected, filter services to only those in the artisanShop
+  const filteredServices = artisanShop
+    ? services.filter(
+        (p) => (p.artisanShop?._id || p.artisanShop) === artisanShop
+      )
+    : services;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
       await submitPost(
-        { review, rating, store, product, user },
-        'reviews'
+        { review, rating, artisanShop, service, user },
+        'artisanreviews'
       ).then((res) => {
         if (res.status === 201) {
           alert('Review added successfully!');
-          navigate('/review');
+          navigate('/rating');
         } else {
-          throw new Error(res.message || 'Failed to add review');
+          throw new Error(res.data.message || 'Failed to add review');
         }
       });
     } catch (err) {
@@ -111,15 +114,15 @@ export default function AddReview() {
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-1 font-semibold">Store</label>
+          <label className="block mb-1 font-semibold">Artisan Shop</label>
           <select
             className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={store}
-            onChange={(e) => setStore(e.target.value)}
+            value={artisanShop}
+            onChange={(e) => setArtisanShop(e.target.value)}
             required
           >
-            <option value="">Select Store</option>
-            {stores.map((s) => (
+            <option value="">Select Artisan Shop</option>
+            {artisanShops.map((s) => (
               <option key={s._id} value={s._id}>
                 {s.name}
               </option>
@@ -127,15 +130,15 @@ export default function AddReview() {
           </select>
         </div>
         <div className="mb-4">
-          <label className="block mb-1 font-semibold">Product</label>
+          <label className="block mb-1 font-semibold">Service</label>
           <select
             className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={product}
-            onChange={(e) => setProduct(e.target.value)}
+            value={service}
+            onChange={(e) => setService(e.target.value)}
             required
           >
-            <option value="">Select Product</option>
-            {filteredProducts.map((p) => (
+            <option value="">Select Service</option>
+            {filteredServices.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.name}
               </option>

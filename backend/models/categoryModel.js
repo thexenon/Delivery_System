@@ -11,7 +11,7 @@ const categorySchema = new mongoose.Schema(
     subcategory: [
       {
         type: String,
-        required: [true, 'Category can not be empty!'],
+        required: [true, 'Subcategory can not be empty!'],
       },
     ],
     active: {

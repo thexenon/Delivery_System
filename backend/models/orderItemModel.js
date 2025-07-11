@@ -29,6 +29,22 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Amount must be set'],
     },
+
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true,
+      },
+    },
+    address: {
+      type: String,
+      required: [true, 'Delivery Address must be set'],
+    },
     quantity: {
       type: Number,
       required: [true, 'Quantity must be set'],
@@ -87,6 +103,11 @@ const orderItemSchema = new mongoose.Schema(
 );
 
 orderItemSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
+orderItemSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
     select: 'name phone location address image',
@@ -97,7 +118,11 @@ orderItemSchema.pre(/^find/, function (next) {
     })
     .populate({
       path: 'product',
-      select: 'name priceDiscount',
+      select: 'name images price priceDiscount',
+    })
+    .populate({
+      path: 'store',
+      select: 'name image location',
     });
   next();
 });

@@ -54,15 +54,15 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-gray-800">All Users</h1>
-          <Link
+          {/* <Link
             to="/add-new/admin"
             className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-colors duration-200"
           >
             + Add New
-          </Link>
+          </Link> */}
         </div>
         {loading ? (
           <div className="text-center text-lg text-gray-500">
@@ -101,7 +101,7 @@ export default function AdminPage() {
             </div>
             <div className="overflow-x-auto rounded-lg shadow bg-white">
               <table
-                className="min-w-full w-auto max-w-full divide-y divide-gray-200"
+                className="min-w-full divide-y divide-gray-200 max-w-full  w-auto"
                 style={{ minWidth: 1000 }}
               >
                 <thead className="bg-gray-100">
@@ -113,13 +113,16 @@ export default function AdminPage() {
                       Role
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Phone
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Address
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Age
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created At
@@ -145,13 +148,16 @@ export default function AdminPage() {
                         {user.role || 'User'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {user.phone}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {user.phone}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {user.address}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {user.age}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-400">
                         {user.createdAt

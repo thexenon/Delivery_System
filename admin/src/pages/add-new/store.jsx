@@ -83,8 +83,9 @@ export default function AddStore() {
     if (!file) return;
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('public_id', `upload_${name}_${merchant}`);
     formData.append('upload_preset', 'Server Images');
-    formData.append('folder', 'Cassiel/Store Images');
+    formData.append('folder', `Elroy/Store Images/${name}`);
     setLoading(true);
     try {
       const res = await fetch(

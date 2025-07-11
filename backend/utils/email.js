@@ -9,7 +9,7 @@ module.exports = class Email {
     this.firstName = user.name;
     this.url = url;
     this.id = user.id;
-    this.from = `Cassiel Delivery <${process.env.EMAIL_FROM}>`;
+    this.from = `Elroy Delivery <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
@@ -47,11 +47,11 @@ module.exports = class Email {
   }
 
   async sendWelcome() {
-    await this.send('welcome', 'Welcome to the Cassiel Delivery!');
+    await this.send('welcome', 'Welcome to the Elroy Delivery!');
   }
 
   async sendVerified() {
-    await this.send('verify', 'Welcome to the Cassiel Delivery!');
+    await this.send('verify', 'Welcome to the Elroy Delivery!');
   }
 
   async sendPasswordReset() {

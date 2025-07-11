@@ -57,7 +57,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'user',
       enum: {
-        values: ['admin', 'superadmin', 'creator', 'user', 'rider', 'merchant'],
+        values: [
+          'admin',
+          'superadmin',
+          'creator',
+          'user',
+          'artisan',
+          'rider',
+          'merchant',
+        ],
         message: 'Role is either ||merchant||user||rider||',
       },
     },

@@ -40,7 +40,7 @@ exports.updateArray = (Model) =>
     const doc = await Model.findByIdAndUpdate(
       req.params.id,
       {
-        $push: { reactions: req.body.reaction },
+        $push: { stores: req.body.store },
       },
       {
         new: true,
@@ -60,24 +60,46 @@ exports.updateArray = (Model) =>
     });
   });
 
-exports.updateCommentors = (Model) =>
+exports.updateFavorites = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndUpdate(
-      req.params.id,
-      {
-        $push: { commentors: req.body.commentor },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    let doc;
+    if (!req.body.product && !req.body.store) {
+      return next(new AppError('Product and Store IDs are required', 400));
+    }
+    if (req.body.product) {
+      doc = await Model.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: { products: req.body.products },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+    } else if (req.body.store) {
+      doc = await Model.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: { stores: req.body.stores },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+    }
 
     if (!doc) {
       return next(new AppError('No document found with that ID', 404));
     }
 
-    next();
+    res.status(201).json({
+      status: 'success',
+      data: {
+        data: doc,
+      },
+    });
   });
 
 exports.createOne = (Model) =>

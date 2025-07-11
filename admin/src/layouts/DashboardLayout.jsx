@@ -50,10 +50,26 @@ const DashboardLayout = () => {
               </li>
               <li>
                 <Link
+                  className={pathname === '/category' ? 'font-semibold' : ''}
+                  to="/category"
+                >
+                  Categories
+                </Link>
+              </li>
+              <li>
+                <Link
                   className={pathname === '/store' ? 'font-semibold' : ''}
                   to="/store"
                 >
-                  Stores
+                  Product Stores
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={pathname === '/shop' ? 'font-semibold' : ''}
+                  to="/shop"
+                >
+                  Artisan Shops
                 </Link>
               </li>
               <li>
@@ -66,10 +82,10 @@ const DashboardLayout = () => {
               </li>
               <li>
                 <Link
-                  className={pathname === '/category' ? 'font-semibold' : ''}
-                  to="/category"
+                  className={pathname === '/service' ? 'font-semibold' : ''}
+                  to="/service"
                 >
-                  Categories
+                  Artisan Services
                 </Link>
               </li>
               <li>
@@ -90,6 +106,14 @@ const DashboardLayout = () => {
               </li>
               <li>
                 <Link
+                  className={pathname === '/request' ? 'font-semibold' : ''}
+                  to="/request"
+                >
+                  Service Requests
+                </Link>
+              </li>
+              <li>
+                <Link
                   className={pathname === '/settings' ? 'font-semibold' : ''}
                   to="/settings"
                 >
@@ -105,6 +129,14 @@ const DashboardLayout = () => {
                       to="/review"
                     >
                       Reviews
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={pathname === '/rating' ? 'font-semibold' : ''}
+                      to="/rating"
+                    >
+                      Artisan Reviews
                     </Link>
                   </li>
                   <li>
@@ -133,7 +165,7 @@ const DashboardLayout = () => {
       <main className="flex-1 p-6 relative">
         <header className="sticky top-0 left-0 right-0 z-30 bg-white shadow-md py-4 px-8 mb-8">
           <h1 className="text-3xl font-bold text-blue-700">
-            Cassiel Deliveries Dashboard
+            Elroy Deliveries Dashboard
           </h1>
         </header>
         <div className="mt-16">

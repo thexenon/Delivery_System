@@ -62,7 +62,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-
+    isVerified: { type: Boolean, default: false },
     images: [
       {
         type: String,
@@ -119,6 +119,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -129,7 +133,7 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ price: 1 });
 productSchema.index({ merchant: 1 });
-productSchema.index({ store: 1 });
+productSchema.index({ store: 1, name: 1 }, { unique: true });
 
 productSchema.virtual('priceFinal').get(function () {
   return Math.round(this.priceDiscount * 1.05 || this.price * 1.05);

@@ -18,6 +18,9 @@ export default function StoreDetails() {
       setError(null);
       try {
         const storeRes = await fetchItem('stores', id);
+        console.log('====================================');
+        console.log('Store Details Response:', storeRes.data.data.data);
+        console.log('====================================');
         setStore(storeRes.data.data.data);
         setProducts(storeRes.data.data.data.products || []);
         setReviews(storeRes.data.data.data.reviews || []);

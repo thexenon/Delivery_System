@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const storeSchema = new mongoose.Schema(
   {
@@ -7,11 +8,15 @@ const storeSchema = new mongoose.Schema(
       required: [true, 'A name must be set'],
       trim: true,
       unique: true,
-      minlength: [8, 'A store name must have more or equal than 8 characters'],
-      maxlength: [
-        70,
-        'A store name must have less or equal than 50 characters',
-      ],
+      minlength: [8, 'A store name must have more or equal to 8 characters'],
+      maxlength: [70, 'A store name must have less or equal to 50 characters'],
+    },
+    email: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      validate: [validator.isEmail, 'Provide a valid email...'],
     },
     merchant: {
       type: mongoose.Schema.ObjectId,
@@ -55,7 +60,7 @@ const storeSchema = new mongoose.Schema(
       max: [5, 'Rating must be below 5.0'],
       set: (val) => Math.round(val * 10) / 10,
     },
-    ratingsQunatity: {
+    ratingsQuantity: {
       type: Number,
       default: 0,
     },
@@ -65,6 +70,12 @@ const storeSchema = new mongoose.Schema(
       select: false,
     },
     isVerified: { type: Boolean, default: false },
+    socials: [
+      {
+        platform: { type: String },
+        link: { type: String },
+      },
+    ],
     workingHours: [
       {
         day: {

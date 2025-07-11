@@ -24,7 +24,7 @@ export default function AddOrder() {
   const [productSearch, setProductSearch] = useState('');
   const [calculatedTotal, setCalculatedTotal] = useState(0);
   const [mapSearch, setMapSearch] = useState('');
-  const [mapCenter, setMapCenter] = useState([6.5244, 3.3792]); // Default to Lagos or your preferred default
+  const [mapCenter, setMapCenter] = useState([7.9465, 1.0232]);
   const [productOptions, setProductOptions] = useState({}); // { [productId]: { [optionName]: value } }
   const [productVarieties, setProductVarieties] = useState({}); // { [productId]: varietyName }
   const [optionQuantities, setOptionQuantities] = useState({}); // { [productId]: { [optionName]: qty } }
