@@ -12,7 +12,6 @@ router
   .post(
     authController.protect,
     authController.restrictTo('merchant', 'admin', 'superadmin', 'creator'),
-    storeController.setRequiredIds,
     storeController.createStore,
   );
 

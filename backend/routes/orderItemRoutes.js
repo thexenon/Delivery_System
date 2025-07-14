@@ -10,7 +10,6 @@ router
   .post(
     authController.protect,
     authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
-    orderItemController.setRequiredIds,
     orderItemController.createOrderItem,
   );
 
