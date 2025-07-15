@@ -17,6 +17,7 @@
     "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/drawer": "^7.5.3",
     "axios": "^1.7.9",
+    "eas-cli": "^16.15.0",
     "expo": "^53.0.9",
     "expo-constants": "~17.1.6",
     "expo-file-system": "^18.1.10",

@@ -1,7 +1,10 @@
 {
   "expo": {
     "scheme": "elroy_customer",
-    "plugins": ["expo-router", "expo-maps"],
+    "plugins": [
+      "expo-router",
+      "expo-maps"
+    ],
     "name": "Elroy Delivery",
     "slug": "elroy_customer",
     "icon": "./src/assets/logo.png",
@@ -21,10 +24,14 @@
     "extra": {
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "00e5f2d1-87c9-432e-94dd-28f18caeee4a"
       }
     },
     "ios": {
       "bundleIdentifier": "com.optyxenon.elroy_customer"
-    }
+    },
+    "owner": "thexenon"
   }
 }
