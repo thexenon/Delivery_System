@@ -81,6 +81,10 @@ const artisanShopSchema = new mongoose.Schema(
         link: { type: String },
       },
     ],
+    top: {
+      type: String,
+      default: 'no',
+    },
     active: {
       type: Boolean,
       default: true,

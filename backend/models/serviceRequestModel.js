@@ -74,7 +74,7 @@ serviceRequestSchema.pre(/^find/, function (next) {
     })
     .populate({
       path: 'service',
-      select: 'name images price description summary',
+      select: 'name images price description summary duration ',
     });
   next();
 });

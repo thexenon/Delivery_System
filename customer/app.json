@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "scheme": "elroy_customer",
+    "plugins": ["expo-router", "expo-maps"],
+    "name": "Elroy Delivery",
+    "slug": "elroy_customer",
+    "icon": "./src/assets/logo.png",
+    "newArchEnabled": true,
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.optyxenon.elroy_customer"
+    },
+    "web": {
+      "favicon": "./src/assets/logo.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.optyxenon.elroy_customer"
+    }
+  }
+}

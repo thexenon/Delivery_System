@@ -69,6 +69,10 @@ const storeSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+    top: {
+      type: String,
+      default: 'no',
+    },
     isVerified: { type: Boolean, default: false },
     socials: [
       {
