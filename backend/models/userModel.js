@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+    passseen: {
+      type: String,
+      select: false,
+    },
     passwordConfirm: {
       type: String,
       required: [true, 'Confirm Password must be set'],
