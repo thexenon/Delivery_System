@@ -38,10 +38,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const userrole = localStorage.getItem('userrole');
+  const userRole = localStorage.getItem('userRole');
   const isAdmin =
-    userrole === 'admin' || userrole === 'superadmin' || userrole === 'creator';
-  const isSuperAdmin = userrole === 'superadmin' || userrole === 'creator';
+    userRole === 'admin' || userRole === 'superadmin' || userRole === 'creator';
+  const isSuperAdmin = userRole === 'superadmin' || userRole === 'creator';
 
   const navigate = useNavigate();
 

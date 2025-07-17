@@ -4,16 +4,16 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 const DashboardLayout = () => {
   const { pathname } = useLocation();
   const [userName, setUserName] = useState('');
-  const userrole = localStorage.getItem('userrole');
+  const userRole = localStorage.getItem('userRole');
 
   const isAdmin =
-    userrole === 'admin' || userrole === 'superadmin' || userrole === 'creator';
-  const isSuperAdmin = userrole === 'superadmin' || userrole === 'creator';
+    userRole === 'admin' || userRole === 'superadmin' || userRole === 'creator';
+  const isSuperAdmin = userRole === 'superadmin' || userRole === 'creator';
 
   function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('userrole');
+    localStorage.removeItem('userRole');
     window.location.href = '/';
   }
 

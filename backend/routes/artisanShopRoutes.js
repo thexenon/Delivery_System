@@ -9,7 +9,7 @@ router
   .get(artisanShopController.getAllArtisanShops)
   .post(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
+    authController.restrictTo('artisan', 'admin', 'superadmin', 'creator'),
     artisanShopController.createArtisanShop,
   );
 
@@ -18,12 +18,12 @@ router
   .get(artisanShopController.getArtisanShop)
   .patch(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
+    authController.restrictTo('artisan', 'admin', 'superadmin', 'creator'),
     artisanShopController.updateArtisanShop,
   )
   .delete(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
+    authController.restrictTo('artisan', 'admin', 'superadmin', 'creator'),
     artisanShopController.deleteArtisanShop,
   );
 

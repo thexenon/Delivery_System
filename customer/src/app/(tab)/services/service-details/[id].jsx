@@ -106,6 +106,7 @@ export default function ServiceDetailsScreen() {
         customer: userUID,
         scheduledTime: bookingScheduleTime,
         address: bookingAddress,
+        amount: service.price,
         location: {
           type: 'Point',
           coordinates: [bookingLocation.longitude, bookingLocation.latitude],

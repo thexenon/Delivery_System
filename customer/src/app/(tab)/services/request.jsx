@@ -170,6 +170,17 @@ export default function ServiceRequestsScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <MaterialIcons
+                      name="price"
+                      size={24}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.modalLabel}>Amount:</Text>
+                    <Text style={styles.modalValue}>
+                      {selectedRequest.amount || 'No Amount'}
+                    </Text>
+                  </View>
+                  <View style={styles.modalRow}>
+                    <MaterialIcons
                       name="location-on"
                       size={24}
                       color={COLORS.primary}

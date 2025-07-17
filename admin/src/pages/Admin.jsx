@@ -16,13 +16,17 @@ export default function AdminPage() {
       .then((data) => {
         const allUsers = data.data.data.data;
         const filteredUsers = allUsers.filter(
-          (u) => u.id !== currentUser?.id && u._id !== currentUser?.id
+          (u) =>
+            u.id !== currentUser?.id &&
+            u._id !== currentUser?.id &&
+            u.role !== 'superadmin' &&
+            u.role !== 'creator'
         );
         setUsers(filteredUsers);
         setLoading(false);
       })
-      .catch(() => {
-        setError('Failed to load users');
+      .catch((err) => {
+        setError(err.message || 'Failed to load users');
         setLoading(false);
       });
   }, []);

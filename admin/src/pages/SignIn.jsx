@@ -19,7 +19,7 @@ const SignIn = () => {
           // Save token and user to localStorage
           localStorage.setItem('token', result.data.token);
           localStorage.setItem('user', JSON.stringify(result.data.data.user));
-          localStorage.setItem('userrole', result.data.data.user.role);
+          localStorage.setItem('userRole', result.data.data.user.role);
           localStorage.setItem('userUID', result.data.data.user._id);
           setError('');
           navigate('/dashboard', { replace: true });

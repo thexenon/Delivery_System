@@ -18,12 +18,24 @@ router
   .get(serviceRequestController.getServiceRequest)
   .patch(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
+    authController.restrictTo(
+      'user',
+      'artisan',
+      'admin',
+      'superadmin',
+      'creator',
+    ),
     serviceRequestController.updateServiceRequest,
   )
   .delete(
     authController.protect,
-    authController.restrictTo('user', 'admin', 'superadmin', 'creator'),
+    authController.restrictTo(
+      'user',
+      'artisan',
+      'admin',
+      'superadmin',
+      'creator',
+    ),
     serviceRequestController.deleteServiceRequest,
   );
 
