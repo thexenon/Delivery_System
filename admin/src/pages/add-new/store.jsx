@@ -55,7 +55,7 @@ export default function AddStore() {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [ratingsAverage, setRatingsAverage] = useState(4.0);
-  const [ratingsQunatity, setRatingsQunatity] = useState(0);
+  const [ratingsQuantity, setRatingsQunatity] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
   const [workingHours, setWorkingHours] = useState([
     { day: 'Monday', open: '', close: '' },
@@ -160,7 +160,7 @@ export default function AddStore() {
         address,
         location,
         ratingsAverage: parseFloat(ratingsAverage),
-        ratingsQunatity: parseInt(ratingsQunatity),
+        ratingsQuantity: parseInt(ratingsQuantity),
         isVerified,
         workingHours,
       };
@@ -335,7 +335,7 @@ export default function AddStore() {
               type="number"
               min="0"
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={ratingsQunatity}
+              value={ratingsQuantity}
               onChange={(e) => setRatingsQunatity(e.target.value)}
             />
           </div>

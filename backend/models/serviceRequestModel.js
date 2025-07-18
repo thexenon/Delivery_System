@@ -38,6 +38,10 @@ const serviceRequestSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'], default: 'Point' },
       coordinates: { type: [Number], required: true }, // [longitude, latitude]
     },
+    amount: {
+      type: Number,
+      required: [true, 'Amount must be set'],
+    },
     active: {
       type: Boolean,
       default: true,
@@ -61,11 +65,11 @@ serviceRequestSchema.pre(/^find/, function (next) {
 serviceRequestSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'customer',
-    select: 'name phone location address image',
+    select: 'name email phone image location address',
   })
     .populate({
       path: 'artisan',
-      select: 'name phone location address image',
+      select: 'name email phone image location address',
     })
     .populate({
       path: 'artisanShop',

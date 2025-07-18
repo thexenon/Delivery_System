@@ -58,7 +58,7 @@ export default function EditStore() {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [ratingsAverage, setRatingsAverage] = useState(4.0);
-  const [ratingsQunatity, setRatingsQunatity] = useState(0);
+  const [ratingsQuantity, setRatingsQunatity] = useState(0);
   const [active, setActive] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [workingHours, setWorkingHours] = useState([
@@ -97,7 +97,7 @@ export default function EditStore() {
         setLng(store.location?.coordinates?.[0] || '');
         setLat(store.location?.coordinates?.[1] || '');
         setRatingsAverage(store.ratingsAverage || 4.0);
-        setRatingsQunatity(store.ratingsQunatity || 0);
+        setRatingsQunatity(store.ratingsQuantity || 0);
         setActive(store.active !== undefined ? store.active : true);
         setIsVerified(store.isVerified || false);
         setWorkingHours(
@@ -167,7 +167,7 @@ export default function EditStore() {
         address,
         location,
         ratingsAverage: parseFloat(ratingsAverage),
-        ratingsQunatity: parseInt(ratingsQunatity),
+        ratingsQuantity: parseInt(ratingsQuantity),
         active,
         isVerified,
         workingHours,
@@ -359,7 +359,7 @@ export default function EditStore() {
               type="number"
               min="0"
               className="w-full border border-gray-300 rounded px-3 py-2"
-              value={ratingsQunatity}
+              value={ratingsQuantity}
               onChange={(e) => setRatingsQunatity(e.target.value)}
             />
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { COLORS, FONT, SIZES } from '../constants';
 
 export default function LocationPickerModal({ visible, onClose, onSelect }) {
@@ -17,8 +18,8 @@ export default function LocationPickerModal({ visible, onClose, onSelect }) {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [region, setRegion] = useState({
-    latitude: 6.5244,
-    longitude: 3.3792,
+    latitude: 6.6745,
+    longitude: -1.5716,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
@@ -41,25 +42,49 @@ export default function LocationPickerModal({ visible, onClose, onSelect }) {
     setLoading(false);
   };
 
-  const handleSelectResult = (item) => {
+  const getStreetName = async (lat, lon) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+      );
+      const data = await res.json();
+      return (
+        data.address?.road ||
+        data.address?.suburb ||
+        data.address?.neighbourhood ||
+        data.address?.village ||
+        data.address?.county ||
+        data.address?.town ||
+        data.address?.city ||
+        data.display_name ||
+        ''
+      );
+    } catch {
+      return '';
+    }
+  };
+
+  const handleSelectResult = async (item) => {
     setRegion({
       latitude: parseFloat(item.lat),
       longitude: parseFloat(item.lon),
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
+    const street = await getStreetName(item.lat, item.lon);
     setSelectedLocation({
       latitude: parseFloat(item.lat),
       longitude: parseFloat(item.lon),
-      address: item.display_name,
+      address: street,
     });
     setSearchResults([]);
     setSearch(item.display_name);
   };
 
-  const handleMapPress = (e) => {
+  const handleMapPress = async (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
-    setSelectedLocation({ latitude, longitude, address: search }); // Use search as fallback address
+    const street = await getStreetName(latitude, longitude);
+    setSelectedLocation({ latitude, longitude, address: street });
     setRegion({ ...region, latitude, longitude });
   };
 

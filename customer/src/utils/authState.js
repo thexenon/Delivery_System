@@ -13,11 +13,12 @@ export const isUserLoggedIn = async () => {
 };
 
 export const handleLogout = async () => {
-  await AsyncStorage.removeItem('jwt');
-  await AsyncStorage.removeItem('userRole');
-  await AsyncStorage.removeItem('userUID');
-  await AsyncStorage.removeItem('userAge');
-  await AsyncStorage.removeItem('userBirthday').then(() => {
+  // await AsyncStorage.removeItem('jwt');
+  // await AsyncStorage.removeItem('userRole');
+  // await AsyncStorage.removeItem('userUID');
+  // await AsyncStorage.removeItem('userAge');
+  // await AsyncStorage.removeItem('userBirthday')
+  await AsyncStorage.clear().then(() => {
     router.replace('/signin');
   });
 };

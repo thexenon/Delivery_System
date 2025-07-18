@@ -1,29 +1,34 @@
 {
   "expo": {
-    "scheme": "cassiel_merchant",
+    "scheme": "elroy_merchant",
     "plugins": ["expo-router", "expo-maps"],
-    "name": "cassiel_merchant",
-    "slug": "cassiel_merchant",
-    "icon": "./assets/logo.png",
+    "name": "Elroy Merchant",
+    "slug": "elroy_merchant",
+    "icon": "./src/assets/logo.png",
     "newArchEnabled": true,
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.optyxenon.cassiel_merchant"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.optyxenon.elroy_merchant"
     },
     "web": {
-      "favicon": "./assets/logo.png",
+      "favicon": "./src/assets/logo.png",
       "bundler": "metro"
     },
     "extra": {
       "router": {
         "origin": false
+      },
+      "eas": {
+        "projectId": "00e5f2d1-87c9-432e-94dd-28f18caeee4a"
       }
     },
     "ios": {
-      "bundleIdentifier": "com.optyxenon.cassiel_merchant"
-    }
+      "bundleIdentifier": "com.optyxenon.elroy_merchant"
+    },
+    "owner": "thexenon"
   }
 }

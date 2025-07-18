@@ -91,7 +91,7 @@ export default function ServiceRequestsScreen() {
       <View style={styles.cardHeader}>
         <MaterialIcons name="assignment" size={28} color={COLORS.primary} />
         <Text style={styles.title}>
-          {item.service.name || 'Service Request'}
+          {item.service ? item.service.name : 'Service Request'}
         </Text>
         <Text style={styles.statusBadge}>{item.status || 'Pending'}</Text>
       </View>
@@ -132,7 +132,7 @@ export default function ServiceRequestsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={true}>
               <Text style={styles.modalTitle}>Service Request Details</Text>
               {selectedRequest && (
                 <>
@@ -144,7 +144,9 @@ export default function ServiceRequestsScreen() {
                     />
                     <Text style={styles.modalLabel}>Title:</Text>
                     <Text style={styles.modalValue}>
-                      {selectedRequest.service.name || 'Service Request'}
+                      {selectedRequest.service
+                        ? selectedRequest.service.name
+                        : 'Service Request'}
                     </Text>
                   </View>
                   <View style={styles.modalRow}>
@@ -170,7 +172,7 @@ export default function ServiceRequestsScreen() {
                   </View>
                   <View style={styles.modalRow}>
                     <MaterialIcons
-                      name="price"
+                      name="money"
                       size={24}
                       color={COLORS.primary}
                     />

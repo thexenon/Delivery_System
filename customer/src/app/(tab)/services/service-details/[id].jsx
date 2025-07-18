@@ -106,7 +106,7 @@ export default function ServiceDetailsScreen() {
         customer: userUID,
         scheduledTime: bookingScheduleTime,
         address: bookingAddress,
-        amount: service.price,
+        amount: service.priceFinal,
         location: {
           type: 'Point',
           coordinates: [bookingLocation.longitude, bookingLocation.latitude],
@@ -573,6 +573,13 @@ export default function ServiceDetailsScreen() {
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                   onChange={handleDateChange}
                   minimumDate={new Date()}
+                  textColor="#222"
+                  style={{
+                    width: 320,
+                    height: 200,
+                    backgroundColor: '#e6f0ff',
+                    borderRadius: 8,
+                  }}
                 />
               )}
               <View style={{ flexDirection: 'row', marginBottom: 12 }}>
@@ -614,8 +621,9 @@ export default function ServiceDetailsScreen() {
                   padding: 10,
                   marginBottom: 12,
                 }}
-                placeholder="Address"
+                placeholder="Search location to see Address"
                 value={bookingAddress}
+                placeholderTextColor={'#000'}
                 onChangeText={setBookingAddress}
                 editable={false}
               />
@@ -653,6 +661,7 @@ export default function ServiceDetailsScreen() {
                   marginBottom: 12,
                 }}
                 placeholder="Preference (optional)"
+                placeholderTextColor={'#000'}
                 value={bookingPreference}
                 onChangeText={setBookingPreference}
               />
@@ -754,7 +763,7 @@ const styles = StyleSheet.create({
   },
   serviceImage: {
     width: width * 0.7,
-    height: 200,
+    height: 300,
     borderRadius: 16,
     resizeMode: 'cover',
   },

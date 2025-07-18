@@ -256,11 +256,12 @@ export default function ServicesScreen() {
                   }}
                 >
                   <Image
-                    source={
-                      service?.images[0]
-                        ? { uri: service.images[0] }
-                        : require('../../../assets/logo.png')
-                    }
+                    // source={
+                    //   service?.images
+                    //     ? { uri: service.images[0] }
+                    //     : require('../../../assets/logo.png')
+                    // }
+                    source={{ uri: service.images?.[0] || images.logo }}
                     style={styles.serviceImage}
                   />
                   <View style={styles.serviceDetails}>

@@ -333,7 +333,7 @@ export default function SignUpScreen() {
                     : new Date(2000, 0, 1)
                 }
                 mode="date"
-                display="spinner"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 maximumDate={new Date()}
                 textColor="#222"
                 style={{
