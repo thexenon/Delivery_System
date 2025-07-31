@@ -9,6 +9,10 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,8 +28,8 @@ export default function ProfileScreen() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [orders, setOrders] = useState([]);
-  const [stores, setStores] = useState([]);
+  const [serviceRequests, setServiceRequests] = useState([]);
+  const [artisanshops, setArtisanShops] = useState([]);
   const [stats, setStats] = useState({
     totalSales: 0,
     totalAmount: 0,
@@ -34,17 +38,20 @@ export default function ProfileScreen() {
     monthly: 0,
   });
   const [dailySalesData, setDailySalesData] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
-  const [salesByStore, setSalesByStore] = useState([]);
-  const [avgOrderValue, setAvgOrderValue] = useState(0);
+  const [topServices, setTopServices] = useState([]);
+  const [salesByArtisanShop, setSalesByArtisanShop] = useState([]);
+  const [avgServiceRequestValue, setAvgServiceRequestValue] = useState(0);
+  const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const router = useRouter();
 
   const fetchUserAndStats = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('jwt');
       const userUID = await AsyncStorage.getItem('userUID');
-      if (!token || !userUID) throw new Error('User not authenticated');
       // Fetch user info
       const result = await getItems(`users/me`);
       if (result.status == 200) {
@@ -53,15 +60,23 @@ export default function ProfileScreen() {
       } else {
         setUser(null);
       }
-      // Fetch stores for this merchant
-      const storesRes = await getItems('stores', { merchant: userUID });
-      const userStores = storesRes?.data?.data?.data || [];
-      setStores(userStores);
-      const storeIds = userStores.map((s) => s._id);
-      // Fetch all orders for this merchant
-      const ordersRes = await getItems('orderItems', { merchant: userUID });
-      const allOrders = ordersRes?.data?.data?.data || [];
-      setOrders(allOrders);
+      // Fetch artisanshops for this artisan
+      const artisanShopsRes = await getItems('artisanshops', {
+        artisan: userUID,
+      });
+      const userArtisanShops = artisanShopsRes?.data?.data?.data || [];
+      setArtisanShops(userArtisanShops);
+      const artisanShopIds = userArtisanShops.map((s) => s._id);
+      // Fetch all serviceRequests for this artisan
+      const serviceRequestsRes = await getItems('servicerequests', {
+        artisan: userUID,
+      });
+      const allServiceRequests = serviceRequestsRes?.data?.data?.data || [];
+      console.log('====================================');
+      console.log(artisanShopIds);
+      // console.log('allServiceRequests', allServiceRequests);
+      console.log('====================================');
+      setServiceRequests(allServiceRequests);
       // Calculate stats
       const now = new Date();
       let totalSales = 0,
@@ -72,30 +87,29 @@ export default function ProfileScreen() {
       let orderCount = 0;
       const dailyMap = {};
       const productMap = {};
-      const storeMap = {};
+      const artisanShopMap = {};
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(now.getDate() - i);
         dailyMap[d.toDateString()] = 0;
       }
-      allOrders.forEach((order) => {
-        if (order.status !== 'delivered') return;
+      allServiceRequests.forEach((serviceRequest) => {
+        if (serviceRequest.status !== 'completed') return;
         orderCount++;
-        const myProducts = (order.products || []).filter(
-          (prod) =>
-            prod.store && storeIds.includes(prod.store._id || prod.store)
-        );
-        if (!myProducts.length) return;
-        const createdAt = new Date(order.createdAt);
-        const orderAmount = myProducts.reduce(
-          (sum, prod) =>
-            sum + (prod.price || 0) * (prod.quantity || prod.qty || 1),
-          0
-        );
-        totalSales += myProducts.reduce(
-          (sum, prod) => sum + (prod.quantity || prod.qty || 1),
-          0
-        );
+        // Each service request has only one service
+        const service = serviceRequest.service;
+        if (!service) return;
+        console.log(serviceRequest.artisanShop);
+
+        const artisanShopId =
+          serviceRequest.artisanShop?._id || serviceRequest.artisanShop;
+        if (!artisanShopIds.includes(artisanShopId)) return;
+
+        const createdAt = new Date(serviceRequest.createdAt);
+        const quantity = serviceRequest.quantity || serviceRequest.qty || 1;
+        const price = service.price || 0;
+        const orderAmount = price * quantity;
+        totalSales += quantity;
         totalAmount += orderAmount;
         const isToday = createdAt.toDateString() === now.toDateString();
         const isThisWeek = (() => {
@@ -113,37 +127,47 @@ export default function ProfileScreen() {
         // Daily sales for chart
         const dayKey = createdAt.toDateString();
         if (dailyMap[dayKey] !== undefined) dailyMap[dayKey] += orderAmount;
-        // Top products
-        myProducts.forEach((prod) => {
-          const key = prod.name || prod.product?.name || 'Product';
-          productMap[key] =
-            (productMap[key] || 0) + (prod.quantity || prod.qty || 1);
-        });
-        // Sales by store
-        myProducts.forEach((prod) => {
-          const storeKey =
-            stores.find((s) => s._id === (prod.store._id || prod.store))
-              ?.name || 'Store';
-          storeMap[storeKey] =
-            (storeMap[storeKey] || 0) +
-            (prod.price || 0) * (prod.quantity || prod.qty || 1);
-        });
+        // Top services
+        const key = service.name || service.service?.name || 'Service';
+        productMap[key] = (productMap[key] || 0) + quantity;
+        // Sales by artisanShop
+        const artisanShopKey =
+          artisanshops.find((s) => s._id === artisanShopId)?.name ||
+          'ArtisanShop';
+        artisanShopMap[artisanShopKey] =
+          (artisanShopMap[artisanShopKey] || 0) + orderAmount;
       });
       setStats({ totalSales, totalAmount, daily, weekly, monthly });
       setDailySalesData(Object.values(dailyMap));
-      setTopProducts(
+      setTopServices(
         Object.entries(productMap)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 5)
       );
-      setSalesByStore(Object.entries(storeMap).sort((a, b) => b[1] - a[1]));
-      setAvgOrderValue(orderCount ? Math.round(totalAmount / orderCount) : 0);
+      setSalesByArtisanShop(
+        Object.entries(artisanShopMap).sort((a, b) => b[1] - a[1])
+      );
+      setAvgServiceRequestValue(
+        orderCount ? Math.round(totalAmount / orderCount) : 0
+      );
     } catch (err) {
       setUser(null);
     }
     setLoading(false);
     setRefreshing(false);
   };
+
+  // Load withdrawals from AsyncStorage
+  useEffect(() => {
+    (async () => {
+      const log = await AsyncStorage.getItem('withdrawalLog');
+      if (log) {
+        const parsed = JSON.parse(log);
+        setWithdrawals(parsed);
+        setTotalWithdrawn(parsed.reduce((sum, w) => sum + w.amount, 0));
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     fetchUserAndStats();
@@ -161,10 +185,6 @@ export default function ProfileScreen() {
         text: 'Logout',
         style: 'destructive',
         onPress: async () => {
-          // await AsyncStorage.removeItem('jwt');
-          // await AsyncStorage.removeItem('userUID');
-          // await AsyncStorage.removeItem('user');
-          // router.replace('/(auth)/signin');
           await handleLogout();
         },
       },
@@ -176,25 +196,34 @@ export default function ProfileScreen() {
   };
 
   const handleExportCSV = async () => {
-    let csv = 'Date,Order ID,Product,Quantity,Price,Total,Store\n';
-    orders.forEach((order) => {
-      if (order.status !== 'delivered') return;
-      (order.products || []).forEach((prod) => {
-        if (!stores.some((s) => s._id === (prod.store._id || prod.store)))
-          return;
-        const storeName =
-          stores.find((s) => s._id === (prod.store._id || prod.store))?.name ||
-          '';
-        csv += `${new Date(order.createdAt).toLocaleDateString()},${
-          order._id
-        },${prod.name || prod.product?.name || ''},${
-          prod.quantity || prod.qty || 1
-        },${prod.price || ''},${
-          (prod.price || 0) * (prod.quantity || prod.qty || 1)
-        },${storeName}\n`;
-      });
-    });
-    const fileUri = FileSystem.cacheDirectory + 'sales_export.csv';
+    let csv =
+      'Date,ServiceRequest ID,Service,Quantity,Price,Total,ArtisanShop\n';
+    serviceRequests.forEach(
+      // ((serviceRequest) => {
+      //   (serviceRequest.products || []).forEach
+      (service) => {
+        // if (
+        //   !artisanshops.some(
+        //     (s) => s._id === (service.artisanShop._id || service.artisanShop)
+        //   )
+        // )
+        //   return;
+        const artisanShopName =
+          artisanshops.find(
+            (s) => s._id === (service.artisanShop._id || service.artisanShop)
+          )?.name || '';
+        csv += `${new Date(service.createdAt).toLocaleDateString()},${
+          service._id
+        },${service.name || service.product?.name || ''},${
+          service.quantity || service.qty || 1
+        },${service.price || ''},${
+          (service.price || 0) * (service.quantity || service.qty || 1)
+        },${artisanShopName}\n`;
+      }
+    );
+    // });
+    const fileUri =
+      FileSystem.cacheDirectory + 'Elroy_Artisan_Sales_Export.csv';
     await FileSystem.writeAsStringAsync(fileUri, csv, {
       encoding: FileSystem.EncodingType.UTF8,
     });
@@ -206,24 +235,36 @@ export default function ProfileScreen() {
 
   const handleExportExcel = async () => {
     let rows = [
-      ['Date', 'Order ID', 'Product', 'Quantity', 'Price', 'Total', 'Store'],
+      [
+        'Date',
+        'ServiceRequest ID',
+        'Service',
+        'Quantity',
+        'Price',
+        'Total',
+        'ArtisanShop',
+      ],
     ];
-    orders.forEach((order) => {
-      if (order.status !== 'delivered') return;
-      (order.products || []).forEach((prod) => {
-        if (!stores.some((s) => s._id === (prod.store._id || prod.store)))
+    serviceRequests.forEach((serviceRequest) => {
+      (serviceRequest.products || []).forEach((service) => {
+        if (
+          !artisanshops.some(
+            (s) => s._id === (service.artisanShop._id || service.artisanShop)
+          )
+        )
           return;
-        const storeName =
-          stores.find((s) => s._id === (prod.store._id || prod.store))?.name ||
-          '';
+        const artisanShopName =
+          artisanshops.find(
+            (s) => s._id === (service.artisanShop._id || service.artisanShop)
+          )?.name || '';
         rows.push([
-          new Date(order.createdAt).toLocaleDateString(),
-          order._id,
-          prod.name || prod.product?.name || '',
-          prod.quantity || prod.qty || 1,
-          prod.price || '',
-          (prod.price || 0) * (prod.quantity || prod.qty || 1),
-          storeName,
+          new Date(serviceRequest.createdAt).toLocaleDateString(),
+          serviceRequest._id,
+          service.name || service.product?.name || '',
+          service.quantity || service.qty || 1,
+          service.price || '',
+          (service.price || 0) * (service.quantity || service.qty || 1),
+          artisanShopName,
         ]);
       });
     });
@@ -231,7 +272,7 @@ export default function ProfileScreen() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sales');
     const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
-    const uri = FileSystem.cacheDirectory + 'sales_export.xlsx';
+    const uri = FileSystem.cacheDirectory + 'Elroy_Artisan_Sales_Export.xlsx';
     await FileSystem.writeAsStringAsync(uri, wbout, {
       encoding: FileSystem.EncodingType.Base64,
     });
@@ -240,6 +281,46 @@ export default function ProfileScreen() {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       dialogTitle: 'Export Sales Data (Excel)',
     });
+  };
+
+  const handleWithdraw = () => {
+    setWithdrawModalVisible(true);
+  };
+
+  const handleWithdrawSubmit = async () => {
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid amount.');
+      return;
+    }
+    if (amount > stats.totalAmount) {
+      Alert.alert(
+        'Amount Exceeded',
+        'You cannot withdraw more than your total sales.'
+      );
+      return;
+    }
+    setWithdrawing(true);
+    setTimeout(async () => {
+      setStats((prev) => ({ ...prev, totalAmount: prev.totalAmount - amount }));
+      // Save withdrawal log
+      const withdrawal = {
+        amount,
+        date: new Date().toISOString(),
+        id: Date.now(),
+      };
+      const newLog = [withdrawal, ...withdrawals];
+      setWithdrawals(newLog);
+      setTotalWithdrawn(newLog.reduce((sum, w) => sum + w.amount, 0));
+      await AsyncStorage.setItem('withdrawalLog', JSON.stringify(newLog));
+      setWithdrawModalVisible(false);
+      setWithdrawAmount('');
+      setWithdrawing(false);
+      Alert.alert(
+        'Withdrawal Successful',
+        `₦${amount.toLocaleString()} withdrawn successfully!`
+      );
+    }, 1000);
   };
 
   if (loading) {
@@ -303,12 +384,36 @@ export default function ProfileScreen() {
         </View>
         <View style={styles.statsRow}>
           <View style={styles.statsBox}>
-            <Text style={styles.statsLabel}>Avg. Order Value</Text>
+            <Text style={styles.statsLabel}>Avg. ServiceRequest Value</Text>
             <Text style={styles.statsValue}>
-              ₦{avgOrderValue.toLocaleString()}
+              ₦{avgServiceRequestValue.toLocaleString()}
             </Text>
           </View>
         </View>
+        <View style={styles.statsRow}>
+          <View style={styles.statsBox}>
+            <Text style={styles.statsLabel}>Total Withdrawn</Text>
+            <Text style={styles.statsValue}>
+              ₦{totalWithdrawn.toLocaleString()}
+            </Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[
+            styles.exportBtn,
+            {
+              backgroundColor: '#4f8cff',
+              borderColor: '#4f8cff',
+              marginTop: 10,
+            },
+          ]}
+          onPress={handleWithdraw}
+        >
+          <Ionicons name="cash-outline" size={18} color="#fff" />
+          <Text style={[styles.exportText, { color: '#fff' }]}>
+            Withdraw Sales
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.exportBtn} onPress={handleExportCSV}>
           <Ionicons name="download-outline" size={18} color="#4f8cff" />
           <Text style={styles.exportText}>Export Sales (CSV)</Text>
@@ -317,23 +422,23 @@ export default function ProfileScreen() {
           <Ionicons name="download-outline" size={18} color="#4f8cff" />
           <Text style={styles.exportText}>Export Sales (Excel)</Text>
         </TouchableOpacity>
-        <Text style={styles.statsSubtitle}>Top Selling Products</Text>
-        {topProducts.length === 0 ? (
+        <Text style={styles.statsSubtitle}>Top Selling Services</Text>
+        {topServices.length === 0 ? (
           <Text style={styles.statsLabel}>No sales yet.</Text>
         ) : (
-          topProducts.map(([name, qty], idx) => (
+          topServices.map(([name, qty], idx) => (
             <Text key={idx} style={styles.statsLabel}>
               {name}: {qty}
             </Text>
           ))
         )}
-        <Text style={styles.statsSubtitle}>Sales by Store</Text>
-        {salesByStore.length === 0 ? (
+        <Text style={styles.statsSubtitle}>Sales by ArtisanShop</Text>
+        {salesByArtisanShop.length === 0 ? (
           <Text style={styles.statsLabel}>No sales yet.</Text>
         ) : (
-          salesByStore.map(([store, amt], idx) => (
+          salesByArtisanShop.map(([artisanShop, amt], idx) => (
             <Text key={idx} style={styles.statsLabel}>
-              {store}: ₦{amt.toLocaleString()}
+              {artisanShop}: ₦{amt.toLocaleString()}
             </Text>
           ))
         )}
@@ -370,6 +475,148 @@ export default function ProfileScreen() {
         <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+      <Modal
+        visible={withdrawModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setWithdrawModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              padding: 28,
+              width: 320,
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: 18,
+                marginBottom: 12,
+              }}
+            >
+              Withdraw Sales
+            </Text>
+            <Text
+              style={{
+                color: '#888',
+                marginBottom: 8,
+              }}
+            >
+              Available: ₦{stats.totalAmount.toLocaleString()}
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#4f8cff',
+                borderRadius: 8,
+                padding: 10,
+                width: '100%',
+                marginBottom: 16,
+                fontSize: 16,
+              }}
+              placeholder="Enter amount to withdraw"
+              keyboardType="numeric"
+              value={withdrawAmount}
+              onChangeText={setWithdrawAmount}
+              editable={!withdrawing}
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#4f8cff',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                }}
+                onPress={handleWithdrawSubmit}
+                disabled={withdrawing}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                  }}
+                >
+                  {withdrawing ? 'Processing...' : 'Withdraw'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#eee',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                }}
+                onPress={() => setWithdrawModalVisible(false)}
+                disabled={withdrawing}
+              >
+                <Text
+                  style={{
+                    color: '#4f8cff',
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+      {/* Withdrawal Log */}
+      {withdrawals.length > 0 && (
+        <View
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 32,
+            marginTop: 20,
+            shadowColor: '#4f8cff',
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 16,
+              marginBottom: 10,
+            }}
+          >
+            Withdrawal Log
+          </Text>
+          {withdrawals.map((w) => (
+            <View
+              key={w.id}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 6,
+              }}
+            >
+              <Text style={{ color: '#4f8cff', fontSize: 16 }}>
+                ₦{w.amount.toLocaleString()}
+              </Text>
+              <Text style={{ color: '#888' }}>
+                {new Date(w.date).toLocaleString()}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }

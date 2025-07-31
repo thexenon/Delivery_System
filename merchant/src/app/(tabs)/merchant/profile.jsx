@@ -9,6 +9,10 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,14 +41,17 @@ export default function ProfileScreen() {
   const [topProducts, setTopProducts] = useState([]);
   const [salesByStore, setSalesByStore] = useState([]);
   const [avgOrderValue, setAvgOrderValue] = useState(0);
+  const [withdrawModalVisible, setWithdrawModalVisible] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const router = useRouter();
 
   const fetchUserAndStats = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('jwt');
       const userUID = await AsyncStorage.getItem('userUID');
-      if (!token || !userUID) throw new Error('User not authenticated');
       // Fetch user info
       const result = await getItems(`users/me`);
       if (result.status == 200) {
@@ -58,8 +65,12 @@ export default function ProfileScreen() {
       const userStores = storesRes?.data?.data?.data || [];
       setStores(userStores);
       const storeIds = userStores.map((s) => s._id);
-      // Fetch all orders for this merchant
-      const ordersRes = await getItems('orderitems', { merchant: userUID });
+      // Fetch all order items for this merchant
+      const ordersRes = await getItems('orderitems');
+      console.log('====================================');
+      // console.log(ordersRes?.data?.data?.data[0]);
+      console.log(storeIds);
+      console.log('====================================');
       const allOrders = ordersRes?.data?.data?.data || [];
       setOrders(allOrders);
       // Calculate stats
@@ -81,21 +92,16 @@ export default function ProfileScreen() {
       allOrders.forEach((order) => {
         if (order.status !== 'delivered') return;
         orderCount++;
-        const myProducts = (order.products || []).filter(
-          (prod) =>
-            prod.store && storeIds.includes(prod.store._id || prod.store)
-        );
-        if (!myProducts.length) return;
+        // Each order item has only one product
+        const prod = order.product;
+        if (!prod) return;
+        const storeId = order.store?._id || order.store;
+        if (!storeIds.includes(storeId)) return;
         const createdAt = new Date(order.createdAt);
-        const orderAmount = myProducts.reduce(
-          (sum, prod) =>
-            sum + (prod.price || 0) * (prod.quantity || prod.qty || 1),
-          0
-        );
-        totalSales += myProducts.reduce(
-          (sum, prod) => sum + (prod.quantity || prod.qty || 1),
-          0
-        );
+        const quantity = order.quantity || order.qty || 1;
+        const price = prod.priceDiscount || prod.price || 0;
+        const orderAmount = price * quantity;
+        totalSales += quantity;
         totalAmount += orderAmount;
         const isToday = createdAt.toDateString() === now.toDateString();
         const isThisWeek = (() => {
@@ -114,20 +120,12 @@ export default function ProfileScreen() {
         const dayKey = createdAt.toDateString();
         if (dailyMap[dayKey] !== undefined) dailyMap[dayKey] += orderAmount;
         // Top products
-        myProducts.forEach((prod) => {
-          const key = prod.name || prod.product?.name || 'Product';
-          productMap[key] =
-            (productMap[key] || 0) + (prod.quantity || prod.qty || 1);
-        });
+        const key = prod.name || prod.product?.name || 'Product';
+        productMap[key] = (productMap[key] || 0) + quantity;
         // Sales by store
-        myProducts.forEach((prod) => {
-          const storeKey =
-            stores.find((s) => s._id === (prod.store._id || prod.store))
-              ?.name || 'Store';
-          storeMap[storeKey] =
-            (storeMap[storeKey] || 0) +
-            (prod.price || 0) * (prod.quantity || prod.qty || 1);
-        });
+        const storeKey =
+          userStores.find((s) => s._id === storeId)?.name || 'Store';
+        storeMap[storeKey] = (storeMap[storeKey] || 0) + orderAmount;
       });
       setStats({ totalSales, totalAmount, daily, weekly, monthly });
       setDailySalesData(Object.values(dailyMap));
@@ -144,6 +142,18 @@ export default function ProfileScreen() {
     setLoading(false);
     setRefreshing(false);
   };
+
+  // Load withdrawals from AsyncStorage
+  useEffect(() => {
+    (async () => {
+      const log = await AsyncStorage.getItem('withdrawalLog');
+      if (log) {
+        const parsed = JSON.parse(log);
+        setWithdrawals(parsed);
+        setTotalWithdrawn(parsed.reduce((sum, w) => sum + w.amount, 0));
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     fetchUserAndStats();
@@ -172,23 +182,20 @@ export default function ProfileScreen() {
   };
 
   const handleExportCSV = async () => {
-    let csv = 'Date,Order ID,Product,Quantity,Price,Total,Store\n';
+    let csv = 'Date,Order ID,Status,Product,Quantity,Price,Total,Store\n';
     orders.forEach((order) => {
-      if (order.status !== 'delivered') return;
-      (order.products || []).forEach((prod) => {
-        if (!stores.some((s) => s._id === (prod.store._id || prod.store)))
-          return;
-        const storeName =
-          stores.find((s) => s._id === (prod.store._id || prod.store))?.name ||
-          '';
-        csv += `${new Date(order.createdAt).toLocaleDateString()},${
-          order._id
-        },${prod.name || prod.product?.name || ''},${
-          prod.quantity || prod.qty || 1
-        },${prod.price || ''},${
-          (prod.price || 0) * (prod.quantity || prod.qty || 1)
-        },${storeName}\n`;
-      });
+      const prod = order.product;
+      if (!prod) return;
+      const storeId = order.store?._id || order.store;
+      if (!stores.some((s) => s._id === storeId)) return;
+      const storeName = stores.find((s) => s._id === storeId)?.name || '';
+      csv += `${new Date(order.createdAt).toLocaleDateString()},${order._id},${
+        order.status
+      },${prod.name || prod.product?.name || ''},${
+        order.quantity || order.qty || 1
+      },${order.price || prod.price || ''},${
+        (order.price || prod.price || 0) * (order.quantity || order.qty || 1)
+      },${storeName}\n`;
     });
     const fileUri = FileSystem.cacheDirectory + 'sales_export.csv';
     await FileSystem.writeAsStringAsync(fileUri, csv, {
@@ -202,26 +209,33 @@ export default function ProfileScreen() {
 
   const handleExportExcel = async () => {
     let rows = [
-      ['Date', 'Order ID', 'Product', 'Quantity', 'Price', 'Total', 'Store'],
+      [
+        'Date',
+        'Order ID',
+        'Status',
+        'Product',
+        'Quantity',
+        'Price',
+        'Total',
+        'Store',
+      ],
     ];
     orders.forEach((order) => {
-      if (order.status !== 'delivered') return;
-      (order.products || []).forEach((prod) => {
-        if (!stores.some((s) => s._id === (prod.store._id || prod.store)))
-          return;
-        const storeName =
-          stores.find((s) => s._id === (prod.store._id || prod.store))?.name ||
-          '';
-        rows.push([
-          new Date(order.createdAt).toLocaleDateString(),
-          order._id,
-          prod.name || prod.product?.name || '',
-          prod.quantity || prod.qty || 1,
-          prod.price || '',
-          (prod.price || 0) * (prod.quantity || prod.qty || 1),
-          storeName,
-        ]);
-      });
+      const prod = order.product;
+      if (!prod) return;
+      const storeId = order.store?._id || order.store;
+      if (!stores.some((s) => s._id === storeId)) return;
+      const storeName = stores.find((s) => s._id === storeId)?.name || '';
+      rows.push([
+        new Date(order.createdAt).toLocaleDateString(),
+        order._id,
+        order.status,
+        prod.name || prod.product?.name || '',
+        order.quantity || order.qty || 1,
+        order.price || prod.price || '',
+        (order.price || prod.price || 0) * (order.quantity || order.qty || 1),
+        storeName,
+      ]);
     });
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -236,6 +250,46 @@ export default function ProfileScreen() {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       dialogTitle: 'Export Sales Data (Excel)',
     });
+  };
+
+  const handleWithdraw = () => {
+    setWithdrawModalVisible(true);
+  };
+
+  const handleWithdrawSubmit = async () => {
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid amount.');
+      return;
+    }
+    if (amount > stats.totalAmount) {
+      Alert.alert(
+        'Amount Exceeded',
+        'You cannot withdraw more than your total sales.'
+      );
+      return;
+    }
+    setWithdrawing(true);
+    setTimeout(async () => {
+      setStats((prev) => ({ ...prev, totalAmount: prev.totalAmount - amount }));
+      // Save withdrawal log
+      const withdrawal = {
+        amount,
+        date: new Date().toISOString(),
+        id: Date.now(),
+      };
+      const newLog = [withdrawal, ...withdrawals];
+      setWithdrawals(newLog);
+      setTotalWithdrawn(newLog.reduce((sum, w) => sum + w.amount, 0));
+      await AsyncStorage.setItem('withdrawalLog', JSON.stringify(newLog));
+      setWithdrawModalVisible(false);
+      setWithdrawAmount('');
+      setWithdrawing(false);
+      Alert.alert(
+        'Withdrawal Successful',
+        `₦${amount.toLocaleString()} withdrawn successfully!`
+      );
+    }, 1000);
   };
 
   if (loading) {
@@ -305,6 +359,30 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </View>
+        <View style={styles.statsRow}>
+          <View style={styles.statsBox}>
+            <Text style={styles.statsLabel}>Total Withdrawn</Text>
+            <Text style={styles.statsValue}>
+              ₦{totalWithdrawn.toLocaleString()}
+            </Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[
+            styles.exportBtn,
+            {
+              backgroundColor: '#4f8cff',
+              borderColor: '#4f8cff',
+              marginTop: 10,
+            },
+          ]}
+          onPress={handleWithdraw}
+        >
+          <Ionicons name="cash-outline" size={18} color="#fff" />
+          <Text style={[styles.exportText, { color: '#fff' }]}>
+            Withdraw Sales
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.exportBtn} onPress={handleExportCSV}>
           <Ionicons name="download-outline" size={18} color="#4f8cff" />
           <Text style={styles.exportText}>Export Sales (CSV)</Text>
@@ -366,6 +444,148 @@ export default function ProfileScreen() {
         <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+      <Modal
+        visible={withdrawModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setWithdrawModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              padding: 28,
+              width: 320,
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: 18,
+                marginBottom: 12,
+              }}
+            >
+              Withdraw Sales
+            </Text>
+            <Text
+              style={{
+                color: '#888',
+                marginBottom: 8,
+              }}
+            >
+              Available: ₦{stats.totalAmount.toLocaleString()}
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: '#4f8cff',
+                borderRadius: 8,
+                padding: 10,
+                width: '100%',
+                marginBottom: 16,
+                fontSize: 16,
+              }}
+              placeholder="Enter amount to withdraw"
+              keyboardType="numeric"
+              value={withdrawAmount}
+              onChangeText={setWithdrawAmount}
+              editable={!withdrawing}
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#4f8cff',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                }}
+                onPress={handleWithdrawSubmit}
+                disabled={withdrawing}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                  }}
+                >
+                  {withdrawing ? 'Processing...' : 'Withdraw'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#eee',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                }}
+                onPress={() => setWithdrawModalVisible(false)}
+                disabled={withdrawing}
+              >
+                <Text
+                  style={{
+                    color: '#4f8cff',
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+      {/* Withdrawal Log */}
+      {withdrawals.length > 0 && (
+        <View
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 32,
+            marginTop: 20,
+            shadowColor: '#4f8cff',
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 16,
+              marginBottom: 10,
+            }}
+          >
+            Withdrawal Log
+          </Text>
+          {withdrawals.map((w) => (
+            <View
+              key={w.id}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 6,
+              }}
+            >
+              <Text style={{ color: '#4f8cff', fontSize: 16 }}>
+                ₦{w.amount.toLocaleString()}
+              </Text>
+              <Text style={{ color: '#888' }}>
+                {new Date(w.date).toLocaleString()}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }

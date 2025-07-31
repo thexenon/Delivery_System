@@ -177,12 +177,12 @@ export default function OrdersScreen() {
             </Text>
           </Text>
         )}
-        {item.location && (
+        {item.location && item.location.coordinates && (
           <Text style={styles.orderLable}>
             Location:
             <Text style={{ color: '#4f8cff', fontWeight: 'bold' }}>
-              {item.location.coordinates[0].toString()},{' '}
-              {item.location.coordinates[1].toString()}
+              {item?.location?.coordinates?.[0].toString()},{' '}
+              {item?.location?.coordinates?.[1].toString()}
             </Text>
           </Text>
         )}

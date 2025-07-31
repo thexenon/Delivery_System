@@ -109,7 +109,20 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
-
+    delivery: {
+      type: {
+        minprice: {
+          type: Number,
+          required: [true, 'Delivery must have a min-price'],
+          default: 10,
+        },
+        maxprice: {
+          type: Number,
+          required: [true, 'Delivery must have a max-price'],
+          default: 30,
+        },
+      },
+    },
     active: {
       type: Boolean,
       default: true,

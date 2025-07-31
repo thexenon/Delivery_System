@@ -278,6 +278,7 @@ export default function CartScreen() {
             const orderItem = {
               order: orderId,
               product: product._id,
+              merchant: product.merchant,
               store: storeId,
               user: userUID,
               quantity,

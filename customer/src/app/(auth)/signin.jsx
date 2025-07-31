@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 import { signIn } from '../../utils/api';
 import { useRouter } from 'expo-router';
 
@@ -16,6 +17,7 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const router = useRouter();
 
   const handleSignIn = async () => {
@@ -80,14 +82,26 @@ export default function SignInScreen() {
           value={email}
           onChangeText={setEmail}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.passwordRow}>
+          <TextInput
+            style={[styles.input, { flex: 1, marginBottom: 0 }]}
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry={!passwordVisible}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible((v) => !v)}
+          >
+            <Ionicons
+              name={passwordVisible ? 'eye-off' : 'eye'}
+              size={22}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       <TouchableOpacity
         style={styles.button}
@@ -150,6 +164,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    color: '#000',
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    padding: 8,
+    zIndex: 1,
   },
   button: {
     width: '100%',

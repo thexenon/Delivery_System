@@ -167,7 +167,7 @@ export default function ServicesScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 0}
     >
       {/* Hero/banner */}
       <ScrollView
@@ -256,12 +256,11 @@ export default function ServicesScreen() {
                   }}
                 >
                   <Image
-                    // source={
-                    //   service?.images
-                    //     ? { uri: service.images[0] }
-                    //     : require('../../../assets/logo.png')
-                    // }
-                    source={{ uri: service.images?.[0] || images.logo }}
+                    source={
+                      service?.images
+                        ? { uri: service.images[0] }
+                        : require('../../../assets/logo.png')
+                    }
                     style={styles.serviceImage}
                   />
                   <View style={styles.serviceDetails}>

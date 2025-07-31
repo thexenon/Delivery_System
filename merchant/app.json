@@ -2,7 +2,7 @@
   "expo": {
     "scheme": "elroy_merchant",
     "plugins": ["expo-router", "expo-maps"],
-    "name": "Elroy Merchant",
+    "name": "Elroy Merchant & Artisan",
     "slug": "elroy_merchant",
     "icon": "./src/assets/logo.png",
     "newArchEnabled": true,
@@ -23,7 +23,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "00e5f2d1-87c9-432e-94dd-28f18caeee4a"
+        "projectId": "424e94a0-aae2-4201-bf9a-00d2c8ee4a33"
       }
     },
     "ios": {

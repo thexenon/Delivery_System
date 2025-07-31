@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "scheme": "elroy_rider",
+    "plugins": [
+      "expo-router",
+      "expo-maps"
+    ],
+    "name": "Elroy Rider",
+    "slug": "elroy_rider",
+    "icon": "./src/assets/logo.png",
+    "newArchEnabled": true,
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.optyxenon.elroy_rider"
+    },
+    "web": {
+      "favicon": "./src/assets/logo.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "88daf286-c3b1-4ec2-87dc-82341f04d59b"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.optyxenon.elroy_rider"
+    },
+    "owner": "thexenon"
+  }
+}

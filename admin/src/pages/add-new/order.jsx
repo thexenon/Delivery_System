@@ -161,6 +161,7 @@ export default function AddOrder() {
           for (const productId of products) {
             const product = allProducts.find((p) => p._id === productId);
             if (!product) continue;
+            const merchantId = product.merchant?._id || product.merchant;
             const storeId = product.store?._id || product.store;
             const quantity = productQuantities[productId] || 1;
             // If you have user preference per product, get it here. Otherwise, set to empty string.
@@ -257,6 +258,7 @@ export default function AddOrder() {
               order: orderId,
               product: productId,
               store: storeId,
+              merchant: merchantId,
               user: customer,
               rider,
               quantity,

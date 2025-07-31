@@ -153,7 +153,7 @@ export default function HomeScreen() {
         <Text style={styles.orderLabel}>
           Total:{' '}
           <Text style={{ color: '#4f8cff', fontWeight: 'bold' }}>
-            ₦{item.amount?.toLocaleString()}
+            {item.amount ? `₦${item.amount?.toLocaleString()}` : 'No Amount'}
           </Text>
         </Text>
         <Text style={styles.orderLabel}>
@@ -333,7 +333,7 @@ export default function HomeScreen() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [storeId]);
 
   return (
     <View style={styles.container}>

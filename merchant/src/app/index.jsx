@@ -16,6 +16,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { isUserLoggedIn } from './utils/auth';
 
 const APP_LOGO = require('../assets/logo.png');
+const OPTYXENON = require('../assets/optyxenon.png');
 
 const onboardingData = [
   {
@@ -96,6 +97,10 @@ export default function Index() {
       <View style={styles.splashContainer}>
         <Image source={APP_LOGO} style={styles.logo} />
         <Text style={styles.splashText}>Elroy Artisan & Merchant</Text>
+        <View style={styles.smallContainer}>
+          <Text style={styles.smallText}>Powered By</Text>
+          <Image source={OPTYXENON} style={styles.smalllogo} />
+        </View>
       </View>
     );
   }
@@ -177,15 +182,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 240,
+    height: 240,
     marginBottom: 24,
     borderRadius: 24,
-    backgroundColor: '#fff',
   },
   splashText: {
     color: '#fff',
     fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  smallContainer: {
+    marginTop: 24,
+    backgroundColor: '#4f8cff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  smalllogo: {
+    width: 200,
+    height: 80,
+    marginBottom: 24,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+  },
+  smallText: {
+    marginVertical: 24,
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 1,
   },

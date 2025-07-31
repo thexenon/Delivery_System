@@ -21,6 +21,11 @@ const orderItemSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'Order Item must belong to a product.'],
     },
+    merchant: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Order Item should have a Merchant'],
+    },
     rider: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',

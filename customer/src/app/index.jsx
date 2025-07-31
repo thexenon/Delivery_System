@@ -11,16 +11,16 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { isUserLoggedIn } from '../utils/authState';
 
 const APP_LOGO = require('../assets/logo.png');
+const OPTYXENON = require('../assets/optyxenon.png');
 
 const onboardingData = [
   {
-    title: 'Welcome to Delivery System',
+    title: 'Welcome to Elroy Delivery & Services',
     description:
       'Easily order and manage your products, and orders from one place.',
     image: require('../assets/onboarding1.png'),
@@ -45,6 +45,7 @@ const onboardingData = [
 export default function Index() {
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -78,8 +79,14 @@ export default function Index() {
       setShowOnboarding(!seen);
     })();
 
+    // Show splash for 5 seconds, then show onboarding if needed
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+      isUserLoggedIn();
+    }, 5000);
+    return () => clearTimeout(timer);
     // return () => isUserLoggedIn(); // Check if user is logged in after splash
-    isUserLoggedIn(); // Check if user is logged in after splash
+    // isUserLoggedIn(); // Check if user is logged in after splash
   }, []);
 
   // Check internet connectivity and alert if offline
@@ -156,12 +163,18 @@ export default function Index() {
     );
   }
 
-  return (
-    <View style={styles.splashContainer}>
-      <Image source={APP_LOGO} style={styles.logo} />
-      <Text style={styles.splashText}>Elroy Delivery</Text>
-    </View>
-  );
+  if (showSplash) {
+    return (
+      <View style={styles.splashContainer}>
+        <Image source={APP_LOGO} style={styles.logo} />
+        <Text style={styles.splashText}>Elroy Delivery & Services</Text>
+        <View style={styles.smallContainer}>
+          <Text style={styles.smallText}>Powered By</Text>
+          <Image source={OPTYXENON} style={styles.smalllogo} />
+        </View>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -172,15 +185,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 240,
+    height: 240,
     marginBottom: 24,
     borderRadius: 24,
-    backgroundColor: '#fff',
   },
   splashText: {
     color: '#fff',
     fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  smallContainer: {
+    marginTop: 24,
+    backgroundColor: '#4f8cff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  smalllogo: {
+    width: 200,
+    height: 80,
+    marginBottom: 24,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+  },
+  smallText: {
+    marginVertical: 24,
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 1,
   },

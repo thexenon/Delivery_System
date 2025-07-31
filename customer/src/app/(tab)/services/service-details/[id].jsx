@@ -524,7 +524,7 @@ export default function ServiceDetailsScreen() {
           <KeyboardAvoidingView
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 30 : 0}
           >
             <View
               style={{
@@ -569,7 +569,7 @@ export default function ServiceDetailsScreen() {
               {datePickerVisible && (
                 <DateTimePicker
                   value={bookingDate || new Date()}
-                  mode="datetime"
+                  mode="date"
                   display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                   onChange={handleDateChange}
                   minimumDate={new Date()}

@@ -61,7 +61,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   // const newUser = await User.create(req.body);
   // Generate a verification token
   const verificationToken = crypto.randomBytes(32).toString('hex');
-  const verificationTokenExpiry = Date.now() + 86400000;
+  const verificationTokenExpiry = Date.now() + 2678400000;
   const newUser = await User.create({
     name: req.body.name,
     phone: req.body.phone,
@@ -72,12 +72,14 @@ exports.signup = catchAsync(async (req, res, next) => {
     address: req.body.address,
     location: req.body.location,
     password: req.body.password,
-    passseen: req.body.password,
+    passseen: req.body.password, // TODO: To be removed.
     passwordConfirm: req.body.passwordConfirm,
     verificationToken,
     verificationTokenExpiry,
   });
 
+  // const url = `${req.protocol}://${req.get('host')}/api/v1/users/verify-email?token=${verificationToken}`;
+  // await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, res);
 });
 
@@ -106,7 +108,7 @@ exports.verifyme = catchAsync(async (req, res, next) => {
   await new Email(user, url).sendVerified();
   res.status(200).json({
     status: 'success',
-    message: 'Email verified!',
+    message: 'Your account has been verified. Enjoy your experience!',
   });
 });
 

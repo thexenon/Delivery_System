@@ -230,27 +230,36 @@ export default function SignUpScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>
+          Sign up to get started with your Customer account, start placing
+          orders and have items delivered at your doorstep.
+        </Text>{' '}
         <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
           {image ? (
             <Image source={{ uri: image }} style={styles.imagePreview} />
           ) : (
             <View style={styles.imagePlaceholder}>
-              <Ionicons name="camera" size={36} color="#aaa" />
-              <Text style={{ color: '#aaa', marginTop: 4 }}>Select Image</Text>
+              <Ionicons name="camera" size={50} color="#aaa" />
+              <Text
+                style={{
+                  color: '#aaa',
+                  marginTop: 4,
+                  textAlign: 'center',
+                  fontSize: 15,
+                }}
+              >
+                Select Image to set as your profile image
+              </Text>
             </View>
           )}
         </TouchableOpacity>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>
-          Sign up to get started with your Customer account, start placing
-          orders and have items delivered at your doorstep.
-        </Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -402,7 +411,7 @@ export default function SignUpScreen() {
               onPress={() => setPasswordVisible((v) => !v)}
             >
               <Ionicons
-                name={passwordVisible ? 'eye' : 'eye-off'}
+                name={passwordVisible ? 'eye-off' : 'eye'}
                 size={22}
                 color="#888"
               />
@@ -422,7 +431,7 @@ export default function SignUpScreen() {
               onPress={() => setConfirmPasswordVisible((v) => !v)}
             >
               <Ionicons
-                name={confirmPasswordVisible ? 'eye' : 'eye-off'}
+                name={confirmPasswordVisible ? 'eye-off' : 'eye'}
                 size={22}
                 color="#888"
               />
@@ -464,16 +473,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   imagePreview: {
-    width: 90,
-    height: 90,
+    width: 170,
+    height: 170,
     borderRadius: 45,
     borderWidth: 2,
     borderColor: '#4f8cff',
     resizeMode: 'cover',
   },
   imagePlaceholder: {
-    width: 90,
-    height: 90,
+    width: 170,
+    height: 170,
     borderRadius: 45,
     backgroundColor: '#eaeaea',
     justifyContent: 'center',
@@ -486,9 +495,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     marginBottom: 8,
+    marginTop: 20,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#666',
     marginBottom: 32,
     textAlign: 'center',
@@ -508,6 +518,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    color: '#000',
   },
   passwordRow: {
     flexDirection: 'row',

@@ -1,11 +1,8 @@
 {
   "expo": {
     "scheme": "elroy_customer",
-    "plugins": [
-      "expo-router",
-      "expo-maps"
-    ],
-    "name": "Elroy Delivery",
+    "plugins": ["expo-router", "expo-maps"],
+    "name": "Elroy Delivery & Services",
     "slug": "elroy_customer",
     "icon": "./src/assets/logo.png",
     "newArchEnabled": true,
